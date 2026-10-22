@@ -19,6 +19,7 @@ import { Route as StudioMuseumIdRouteImport } from './routes/studio.$museumId'
 import { Route as ApiPublicArtworkGuideRouteImport } from './routes/api/public/artwork-guide'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiPublicTranscribeRouteImport } from './routes/api/public/transcribe'
+import { Route as ApiPublicAgentToolsSearchArtRouteImport } from './routes/api/public/agent-tools/search-art'
 import { Route as ApiPublicAudioIdRouteImport } from './routes/api/public/audio.$id'
 import { Route as ApiPublicPackUrlsPackIdRouteImport } from './routes/api/public/pack-urls.$packId'
 import { Route as MuseumSlugArtifactRefRouteImport } from './routes/museum.$slug_.artifact.$ref'
@@ -73,6 +74,12 @@ const ApiPublicTranscribeRoute = ApiPublicTranscribeRouteImport.update({
   path: '/api/public/transcribe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAgentToolsSearchArtRoute =
+  ApiPublicAgentToolsSearchArtRouteImport.update({
+    id: '/api/public/agent-tools/search-art',
+    path: '/api/public/agent-tools/search-art',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicAudioIdRoute = ApiPublicAudioIdRouteImport.update({
   id: '/api/public/audio/$id',
   path: '/api/public/audio/$id',
@@ -100,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/api/public/artwork-guide': typeof ApiPublicArtworkGuideRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/transcribe': typeof ApiPublicTranscribeRoute
+  '/api/public/agent-tools/search-art': typeof ApiPublicAgentToolsSearchArtRoute
   '/api/public/audio/$id': typeof ApiPublicAudioIdRoute
   '/api/public/pack-urls/$packId': typeof ApiPublicPackUrlsPackIdRoute
   '/museum/$slug/artifact/$ref': typeof MuseumSlugArtifactRefRoute
@@ -115,6 +123,7 @@ export interface FileRoutesByTo {
   '/api/public/artwork-guide': typeof ApiPublicArtworkGuideRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/transcribe': typeof ApiPublicTranscribeRoute
+  '/api/public/agent-tools/search-art': typeof ApiPublicAgentToolsSearchArtRoute
   '/api/public/audio/$id': typeof ApiPublicAudioIdRoute
   '/api/public/pack-urls/$packId': typeof ApiPublicPackUrlsPackIdRoute
   '/museum/$slug/artifact/$ref': typeof MuseumSlugArtifactRefRoute
@@ -131,6 +140,7 @@ export interface FileRoutesById {
   '/api/public/artwork-guide': typeof ApiPublicArtworkGuideRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/transcribe': typeof ApiPublicTranscribeRoute
+  '/api/public/agent-tools/search-art': typeof ApiPublicAgentToolsSearchArtRoute
   '/api/public/audio/$id': typeof ApiPublicAudioIdRoute
   '/api/public/pack-urls/$packId': typeof ApiPublicPackUrlsPackIdRoute
   '/museum/$slug_/artifact/$ref': typeof MuseumSlugArtifactRefRoute
@@ -148,6 +158,7 @@ export interface FileRouteTypes {
     | '/api/public/artwork-guide'
     | '/api/public/health'
     | '/api/public/transcribe'
+    | '/api/public/agent-tools/search-art'
     | '/api/public/audio/$id'
     | '/api/public/pack-urls/$packId'
     | '/museum/$slug/artifact/$ref'
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/api/public/artwork-guide'
     | '/api/public/health'
     | '/api/public/transcribe'
+    | '/api/public/agent-tools/search-art'
     | '/api/public/audio/$id'
     | '/api/public/pack-urls/$packId'
     | '/museum/$slug/artifact/$ref'
@@ -178,6 +190,7 @@ export interface FileRouteTypes {
     | '/api/public/artwork-guide'
     | '/api/public/health'
     | '/api/public/transcribe'
+    | '/api/public/agent-tools/search-art'
     | '/api/public/audio/$id'
     | '/api/public/pack-urls/$packId'
     | '/museum/$slug_/artifact/$ref'
@@ -194,6 +207,7 @@ export interface RootRouteChildren {
   ApiPublicArtworkGuideRoute: typeof ApiPublicArtworkGuideRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
   ApiPublicTranscribeRoute: typeof ApiPublicTranscribeRoute
+  ApiPublicAgentToolsSearchArtRoute: typeof ApiPublicAgentToolsSearchArtRoute
   ApiPublicAudioIdRoute: typeof ApiPublicAudioIdRoute
   ApiPublicPackUrlsPackIdRoute: typeof ApiPublicPackUrlsPackIdRoute
   MuseumSlugArtifactRefRoute: typeof MuseumSlugArtifactRefRoute
@@ -271,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicTranscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/agent-tools/search-art': {
+      id: '/api/public/agent-tools/search-art'
+      path: '/api/public/agent-tools/search-art'
+      fullPath: '/api/public/agent-tools/search-art'
+      preLoaderRoute: typeof ApiPublicAgentToolsSearchArtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/audio/$id': {
       id: '/api/public/audio/$id'
       path: '/api/public/audio/$id'
@@ -306,6 +327,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicArtworkGuideRoute: ApiPublicArtworkGuideRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
   ApiPublicTranscribeRoute: ApiPublicTranscribeRoute,
+  ApiPublicAgentToolsSearchArtRoute: ApiPublicAgentToolsSearchArtRoute,
   ApiPublicAudioIdRoute: ApiPublicAudioIdRoute,
   ApiPublicPackUrlsPackIdRoute: ApiPublicPackUrlsPackIdRoute,
   MuseumSlugArtifactRefRoute: MuseumSlugArtifactRefRoute,
