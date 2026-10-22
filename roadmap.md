@@ -15,4 +15,4 @@
 - [x] Museum cover photos: demo images hosted as app assets, shown in the picker list and museum header
 - [x] Remove unrelated and generated museum photos from every museum view.
 - [x] Galerie Saint-Roch: use its actual interior photo from the official gallery website.
-- [ ] Correct Musée Lumière to Lyon and replace the fictional Maison des Brumes with Musée des Beaux-Arts de Lyon; add exact museum photos and verify selection.
+- [x] Correct Musée Lumière to Lyon and replace the fictional Maison des Brumes with Musée des Beaux-Arts de Lyon; add exact museum photos and verify selection.
