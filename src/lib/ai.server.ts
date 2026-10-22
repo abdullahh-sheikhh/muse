@@ -55,6 +55,49 @@ export async function translateStop(
   return { title: (title ?? input.title).trim(), body: rest.join("\n").trim() || input.body };
 }
 
+/** Write a spoken guide script for one artwork, in the requested language. */
+export async function writeGuideScript(
+  apiKey: string,
+  input: {
+    title: string;
+    artist: string;
+    year: string;
+    room: string;
+    museumName: string;
+    facts: string[];
+  },
+  language: string,
+) {
+  const provider = createOpenAI({
+    baseURL: `${GATEWAY}/v1`,
+    apiKey,
+    headers: { "Lovable-API-Key": apiKey, "X-Lovable-AIG-SDK": "vercel-ai-sdk" },
+    fetch: runIdFetch(),
+  });
+  let failure: unknown;
+  const result = streamText({
+    model: provider.responses(TEXT_MODEL),
+    instructions:
+      "You are a warm, calm museum guide recording an audio guide. Write a spoken script of about 120 words: vivid, accurate, no headings, no lists, no stage directions — only the words the visitor will hear. Use the curator facts when provided; never invent provenance or dates.",
+    prompt: `Write the script in ${language}.\n\nMuseum: ${input.museumName}\nArtwork: ${input.title}\nArtist: ${input.artist}\nYear: ${input.year}\nRoom: ${input.room}\nCurator facts:\n${input.facts.map((f) => `- ${f}`).join("\n") || "(none)"}`,
+    providerOptions: {
+      openai: {
+        forceReasoning: true,
+        reasoningEffort: "low",
+        reasoningSummary: "auto",
+        store: false,
+        include: ["reasoning.encrypted_content"],
+      },
+    },
+    onError: ({ error }) => {
+      failure = error;
+    },
+  });
+  const text = (await result.text).trim();
+  if (!text) throw new Error(failure instanceof Error ? failure.message : "Script generation failed");
+  return text;
+}
+
 /** Generate a narrated WAV file for the given script. */
 export async function synthesize(apiKey: string, text: string) {
   const res = await fetch(`${GATEWAY}/v1/audio/speech`, {
