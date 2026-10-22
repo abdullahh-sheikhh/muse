@@ -315,10 +315,11 @@ function MuseumPage() {
 
         <form onSubmit={lookup} className="mt-6 rounded-3xl bg-card p-5 shadow-soft">
           <label className="text-sm font-medium" htmlFor="ref-input">
-            {museum.ref_label}
+            Search artworks
           </label>
           <div className="mt-3 flex gap-2">
             <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 id="ref-input"
                 value={refInput}
@@ -326,9 +327,8 @@ function MuseumPage() {
                   setRefInput(e.target.value);
                   setRefError(false);
                 }}
-                placeholder="As printed on the label"
-                className="h-12 rounded-xl pr-12"
-                autoCapitalize="characters"
+                placeholder={`Name, artist, room or ${museum.ref_label.toLowerCase()}`}
+                className="h-12 rounded-xl pl-11 pr-12"
               />
               <RefMicButton
                 onFail={() => document.getElementById("ref-input")?.focus()}
@@ -354,7 +354,7 @@ function MuseumPage() {
               <ArrowRight />
             </Button>
           </div>
-          {refError && <p className="mt-2 text-sm text-destructive">Number not found. Check the label.</p>}
+          {refError && <p className="mt-2 text-sm text-destructive">Nothing found. Check the label or try another word.</p>}
         </form>
 
         <section className="mt-10">
