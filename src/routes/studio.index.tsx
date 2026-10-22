@@ -12,6 +12,8 @@ import { LANGUAGES, slugify } from "@/lib/languages";
 export const Route = createFileRoute("/studio/")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Your museums — ADI Studio" },
       { name: "description", content: "Manage your museum audioguides." },
       { property: "og:title", content: "ADI Studio" },

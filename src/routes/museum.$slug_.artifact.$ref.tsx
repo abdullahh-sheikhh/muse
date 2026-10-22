@@ -11,6 +11,8 @@ import { getCachedAudio, getDownloadedPack, getPreferredLanguage, logEvent } fro
 export const Route = createFileRoute("/museum/$slug_/artifact/$ref")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Artwork — Muse" },
       { name: "description", content: "Listen to the story of this artwork." },
       { property: "og:title", content: "Artwork — Muse" },

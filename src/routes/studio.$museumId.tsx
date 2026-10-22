@@ -15,6 +15,8 @@ import type { Tables } from "@/integrations/supabase/types";
 export const Route = createFileRoute("/studio/$museumId")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Edit audioguide — ADI Studio" },
       { name: "description", content: "Write stops, pick languages and generate narrated audio." },
       { property: "og:title", content: "Edit audioguide — ADI Studio" },

@@ -10,6 +10,8 @@ import { lang } from "@/lib/languages";
 export const Route = createFileRoute("/m/$slug")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Audioguide — ADI" },
       { name: "description", content: "Listen to the museum audioguide in your language." },
       { property: "og:title", content: "Museum audioguide — ADI" },
