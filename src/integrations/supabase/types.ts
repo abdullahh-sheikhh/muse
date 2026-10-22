@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_messages: {
+        Row: {
+          artwork_id: string | null
+          conversation_id: string | null
+          created_at: string
+          id: string
+          language: string | null
+          museum_id: string | null
+          role: string | null
+          text: string
+          visitor_id: string | null
+        }
+        Insert: {
+          artwork_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          language?: string | null
+          museum_id?: string | null
+          role?: string | null
+          text: string
+          visitor_id?: string | null
+        }
+        Update: {
+          artwork_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          language?: string | null
+          museum_id?: string | null
+          role?: string | null
+          text?: string
+          visitor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_messages_artwork_id_fkey"
+            columns: ["artwork_id"]
+            isOneToOne: false
+            referencedRelation: "artifacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_messages_museum_id_fkey"
+            columns: ["museum_id"]
+            isOneToOne: false
+            referencedRelation: "museums"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       artifacts: {
         Row: {
           artist: string
