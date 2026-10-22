@@ -31,7 +31,7 @@ function Welcome() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("museums")
-        .select("name, slug, city, country")
+        .select("name, slug, city, country, image_url")
         .order("name");
       if (error) throw error;
       return data ?? [];
@@ -41,6 +41,12 @@ function Welcome() {
   const countries = [...new Set(all.map((m) => m.country).filter(Boolean))].sort();
   const cities = [...new Set(all.filter((m) => m.country === country).map((m) => m.city).filter(Boolean))].sort();
   const cityMuseums = all.filter((m) => m.country === country && m.city === city);
+  const rows =
+    step === "country"
+      ? countries.map((c) => ({ label: c, image: null as string | null }))
+      : step === "city"
+        ? cities.map((c) => ({ label: c, image: null as string | null }))
+        : cityMuseums.map((m) => ({ label: m.name, image: m.image_url }));
 
   function useMyLocation() {
     if (!("geolocation" in navigator)) {
