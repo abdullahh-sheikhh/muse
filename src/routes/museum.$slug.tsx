@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { QrScanner } from "@/components/QrScanner";
+import { RefMicButton } from "@/components/RefMicButton";
+import { fromIso3, nativeName } from "@/lib/guide-languages";
 import { LANGUAGES, lang } from "@/lib/languages";
 import { museumPhoto } from "@/lib/museum-photos";
 import {
@@ -100,9 +102,9 @@ function MuseumPage() {
     }
   }, [museum]);
 
-  async function lookup(e?: React.FormEvent) {
+  async function lookup(e?: React.FormEvent, spoken?: string) {
     e?.preventDefault();
-    const ref = refInput.trim();
+    const ref = (spoken ?? refInput).trim();
     if (!ref || !museum) return;
     setRefError(false);
     const { data, error } = await supabase.rpc("lookup_artifact", { _slug: slug, _ref: ref });
@@ -261,17 +263,38 @@ function MuseumPage() {
             {museum.ref_label}
           </label>
           <div className="mt-3 flex gap-2">
-            <Input
-              id="ref-input"
-              value={refInput}
-              onChange={(e) => {
-                setRefInput(e.target.value);
-                setRefError(false);
-              }}
-              placeholder="As printed on the label"
-              className="h-12 rounded-xl"
-              autoCapitalize="characters"
-            />
+            <div className="relative flex-1">
+              <Input
+                id="ref-input"
+                value={refInput}
+                onChange={(e) => {
+                  setRefInput(e.target.value);
+                  setRefError(false);
+                }}
+                placeholder="As printed on the label"
+                className="h-12 rounded-xl pr-12"
+                autoCapitalize="characters"
+              />
+              <RefMicButton
+                onFail={() => document.getElementById("ref-input")?.focus()}
+                onResult={(ref, code) => {
+                  setRefInput(ref);
+                  void lookup(undefined, ref);
+                  const spoken = fromIso3(code);
+                  if (spoken && spoken !== getPreferredLanguage()) {
+                    toast(`Switch guide to ${nativeName(spoken)}?`, {
+                      action: {
+                        label: "Switch",
+                        onClick: () => {
+                          void setPreferredLanguage(spoken);
+                          setPreferred(spoken);
+                        },
+                      },
+                    });
+                  }
+                }}
+              />
+            </div>
             <Button type="submit" size="icon" className="h-12 w-12 rounded-xl" aria-label="Open artwork">
               <ArrowRight />
             </Button>

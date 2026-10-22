@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           artist: string
           created_at: string
+          description: string
           id: string
           image_url: string | null
           museum_id: string
@@ -30,6 +31,7 @@ export type Database = {
         Insert: {
           artist?: string
           created_at?: string
+          description?: string
           id?: string
           image_url?: string | null
           museum_id: string
@@ -42,6 +44,7 @@ export type Database = {
         Update: {
           artist?: string
           created_at?: string
+          description?: string
           id?: string
           image_url?: string | null
           museum_id?: string
@@ -67,6 +70,7 @@ export type Database = {
           id: string
           label: string
           sort_order: number
+          source_title: string | null
           source_url: string | null
         }
         Insert: {
@@ -74,6 +78,7 @@ export type Database = {
           id?: string
           label: string
           sort_order?: number
+          source_title?: string | null
           source_url?: string | null
         }
         Update: {
@@ -81,11 +86,47 @@ export type Database = {
           id?: string
           label?: string
           sort_order?: number
+          source_title?: string | null
           source_url?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "artwork_facts_artwork_id_fkey"
+            columns: ["artwork_id"]
+            isOneToOne: false
+            referencedRelation: "artifacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      artwork_guides: {
+        Row: {
+          artwork_id: string
+          audio_path: string | null
+          created_at: string
+          id: string
+          language: string
+          script_text: string
+        }
+        Insert: {
+          artwork_id: string
+          audio_path?: string | null
+          created_at?: string
+          id?: string
+          language: string
+          script_text: string
+        }
+        Update: {
+          artwork_id?: string
+          audio_path?: string | null
+          created_at?: string
+          id?: string
+          language?: string
+          script_text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artwork_guides_artwork_id_fkey"
             columns: ["artwork_id"]
             isOneToOne: false
             referencedRelation: "artifacts"
