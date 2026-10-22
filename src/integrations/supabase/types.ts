@@ -131,6 +131,7 @@ export type Database = {
       museums: {
         Row: {
           city: string
+          country: string
           created_at: string
           id: string
           image_url: string | null
@@ -147,6 +148,7 @@ export type Database = {
         }
         Insert: {
           city?: string
+          country?: string
           created_at?: string
           id?: string
           image_url?: string | null
@@ -163,6 +165,7 @@ export type Database = {
         }
         Update: {
           city?: string
+          country?: string
           created_at?: string
           id?: string
           image_url?: string | null

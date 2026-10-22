@@ -15,6 +15,13 @@
       "when": 1792665129043,
       "tag": "0001_muse_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792666620403,
+      "tag": "0002_museum_country",
+      "breakpoints": true
     }
   ]
 }
