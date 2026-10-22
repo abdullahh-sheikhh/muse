@@ -137,6 +137,60 @@ function Welcome() {
             <div className="flex items-center gap-2 text-sm font-medium">
               <Search className="h-4 w-4 text-primary" /> Or choose a museum
             </div>
+            <form
+              className="mt-4 flex gap-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (searchHits[0]) {
+                  navigate({ to: "/museum/$slug", params: { slug: searchHits[0].slug } });
+                } else {
+                  void searchTheWeb();
+                }
+              }}
+            >
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search any museum or city…"
+                className="h-12 rounded-xl"
+              />
+              {q && searchHits.length === 0 && (
+                <Button
+                  type="submit"
+                  size="icon"
+                  variant="secondary"
+                  className="h-12 w-12 shrink-0 rounded-xl"
+                  disabled={searching}
+                  aria-label="Search the web for this museum"
+                >
+                  {searching ? <Loader2 className="animate-spin" /> : <Globe />}
+                </Button>
+              )}
+            </form>
+            {q && (
+              <ul className="mt-3 space-y-2">
+                {searchHits.slice(0, 5).map((m) => (
+                  <li key={m.slug}>
+                    <button
+                      type="button"
+                      onClick={() => navigate({ to: "/museum/$slug", params: { slug: m.slug } })}
+                      className="flex min-h-12 w-full items-center gap-3 rounded-2xl border border-border bg-background px-3 text-left transition-all active:scale-[0.98]"
+                    >
+                      <span className="min-w-0 flex-1 truncate font-medium">{m.name}</span>
+                      <span className="shrink-0 text-xs text-muted-foreground">
+                        {m.city}
+                        {m.country ? `, ${m.country}` : ""}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+                {searchHits.length === 0 && (
+                  <li className="px-1 text-sm text-muted-foreground">
+                    Not in our directory yet — tap the globe to find it on the web and add it.
+                  </li>
+                )}
+              </ul>
+            )}
             <div className="mt-4 grid grid-cols-3 gap-1 rounded-2xl bg-secondary p-1">
               {(["country", "city", "museum"] as const).map((s, i) => {
                 const enabled = s === "country" || (s === "city" && !!country) || (s === "museum" && !!city);
