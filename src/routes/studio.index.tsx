@@ -47,7 +47,7 @@ function Studio() {
       source_language: source,
       languages: Array.from(new Set([source, "en", "fr"])),
     });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setName("");
     qc.invalidateQueries({ queryKey: ["museums"] });
   }

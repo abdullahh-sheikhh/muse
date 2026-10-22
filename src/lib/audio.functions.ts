@@ -20,7 +20,7 @@ export const generateStopAudio = createServerFn({ method: "POST" })
     }
     if (!stop.body.trim()) throw new Error("Write the text of this stop first");
 
-    const apiKey = process.env.LOVABLE_API_KEY;
+    const apiKey = process.env['LOVABLE_API_KEY'];
     if (!apiKey) throw new Error("AI is not configured");
     const { translateStop, synthesize } = await import("@/lib/ai.server");
 

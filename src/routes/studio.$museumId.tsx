@@ -92,7 +92,7 @@ function MuseumSettings({ museum, onSaved }: { museum: Tables<"museums">; onSave
   async function save() {
     const languages = Array.from(new Set([museum.source_language, ...langs]));
     const { error } = await supabase.from("museums").update({ name, intro, languages }).eq("id", museum.id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Saved");
     onSaved();
   }
@@ -170,7 +170,7 @@ function StopCard({
 
   async function generate() {
     if (dirty && !(await save())) return;
-    if (!body.trim()) return toast.error("Write the text first");
+    if (!body.trim()) { toast.error("Write the text first"); return; }
     for (const l of museum.languages) {
       setWorking(l);
       try {

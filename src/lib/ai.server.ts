@@ -52,7 +52,7 @@ export async function translateStop(
   const text = (await result.text).trim();
   if (!text) throw new Error(failure instanceof Error ? failure.message : "Translation failed");
   const [title, ...rest] = text.split(/\n\s*---\s*\n/);
-  return { title: title.trim(), body: rest.join("\n").trim() || input.body };
+  return { title: (title ?? input.title).trim(), body: rest.join("\n").trim() || input.body };
 }
 
 /** Generate a narrated WAV file for the given script. */
