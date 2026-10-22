@@ -103,8 +103,8 @@ function MuseumPage() {
     if (!ref || !museum) return;
     setRefError(false);
     const { data, error } = await supabase.rpc("lookup_artifact", { _slug: slug, _ref: ref });
-    const hit = !error && data?.[0];
-    if (hit) {
+    const hit = !error ? data?.[0] : undefined;
+    if (hit?.artifact_ref) {
       logEvent("number_entry", museum.id);
       navigate({ to: "/museum/$slug/artifact/$ref", params: { slug, ref: hit.artifact_ref } });
     } else {

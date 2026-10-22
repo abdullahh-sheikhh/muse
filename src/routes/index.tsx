@@ -52,9 +52,9 @@ function Welcome() {
         `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`,
       );
       const results = (await res.json()) as { lat: string; lon: string; display_name: string }[];
-      if (!results.length) throw new Error("not found");
       const r = results[0];
-      saveLocation({ lat: Number(r.lat), lng: Number(r.lon), label: r.display_name.split(",")[0] });
+      if (!r) throw new Error("not found");
+      saveLocation({ lat: Number(r.lat), lng: Number(r.lon), label: r.display_name.split(",")[0] ?? q });
       navigate({ to: "/museums" });
     } catch {
       toast.error("City not found — try a nearby larger city.");
