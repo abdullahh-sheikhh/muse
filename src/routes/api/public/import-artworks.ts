@@ -57,6 +57,7 @@ export const Route = createFileRoute("/api/public/import-artworks")({
             year: a.year,
             room: a.room,
             description: a.description,
+            image_url: a.image_url,
             sort_order: i + 1,
           }));
           const { data: inserted, error } = await supabaseAdmin

@@ -11,6 +11,7 @@ import { ensureVisitor, getPreferredLanguage, logEvent } from "@/lib/visitor";
 import { startAgentSession } from "@/lib/agent.functions";
 import { isRtl } from "@/lib/guide-languages";
 import { SESSION_SECONDS } from "@/lib/agent-rules";
+import helios from "@/assets/helios.png";
 
 type Props = { artworkId: string; museumId: string; artworkTitle: string };
 
@@ -115,7 +116,7 @@ function LiveGuide({ artworkId, museumId, artworkTitle }: Props) {
   return <div className="flex flex-col items-center gap-4" aria-label={`Ask the guide about ${artworkTitle}`}>
     <h2 className="text-3xl">Ask the guide</h2>
     {active ? <>
-      <div className={`flex h-24 w-24 items-center justify-center rounded-full border-2 border-primary bg-primary/15 text-primary ${conversation.isSpeaking ? "motion-safe:animate-pulse" : "motion-safe:animate-[pulse_3s_ease-in-out_infinite]"}`}><Mic className="h-9 w-9" /></div>
+      <div className={`flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-primary bg-primary/15 text-primary ${conversation.isSpeaking ? "motion-safe:animate-pulse" : "motion-safe:animate-[pulse_3s_ease-in-out_infinite]"}`}><img src={helios} alt="" width={96} height={96} className="h-16 w-16 object-contain" /></div>
       <p className="text-sm text-primary" role="status">{conversation.isSpeaking ? "Your guide is speaking" : conversation.isMuted ? "Microphone muted" : "Listening"} · {Math.floor(remaining / 60)}:{String(remaining % 60).padStart(2, "0")}</p>
       <ol className="flex max-h-80 w-full flex-col gap-3 overflow-y-auto" aria-live="polite" dir={isRtl(language) ? "rtl" : "ltr"}>
         {captions.map((caption, index) => <li key={index} className={`max-w-[90%] break-words rounded-lg px-4 py-3 text-sm ${caption.role === "user" ? "self-end bg-secondary text-secondary-foreground" : "self-start bg-accent text-accent-foreground"}`}><span className="mb-1 block text-xs font-medium">{caption.role === "user" ? "You" : "Guide"}</span>{caption.text}</li>)}
@@ -125,7 +126,7 @@ function LiveGuide({ artworkId, museumId, artworkTitle }: Props) {
         <Button variant="destructive" className="h-14 flex-1" onClick={() => conversation.endSession()}><PhoneOff />End</Button>
       </div>
     </> : <>
-      <Button variant="outline" className="h-24 w-24 rounded-full border-2 border-primary bg-card text-primary" aria-label={state === "ended" ? "Talk again" : "Talk to your guide"} disabled={busy} onClick={() => localStorage.getItem("muse-mic-explained") === "yes" ? void connect() : setExplainer(true)}>{busy ? <Loader2 className="h-9 w-9 animate-spin" /> : <Mic className="h-9 w-9" />}</Button>
+      <Button variant="outline" className="h-24 w-24 overflow-hidden rounded-full border-2 border-primary bg-card text-primary" aria-label={state === "ended" ? "Talk again" : "Talk to your guide"} disabled={busy} onClick={() => localStorage.getItem("muse-mic-explained") === "yes" ? void connect() : setExplainer(true)}>{busy ? <Loader2 className="h-9 w-9 animate-spin" /> : <img src={helios} alt="AI guide" loading="lazy" width={96} height={96} className="h-16 w-16 object-contain" />}</Button>
       <p role="status" className="text-center text-sm">{state === "mic" ? "Requesting microphone…" : state === "connecting" ? "Connecting…" : state === "ended" ? "Conversation ended" : "Talk to your guide"}</p>
       {state === "ended" && <Button variant="link" onClick={() => void connect()}>Talk again</Button>}
       <p className="text-xs text-muted-foreground">Pro · voice guide · ask anything</p>

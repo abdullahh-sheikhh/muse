@@ -134,6 +134,28 @@ function MuseumPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [museum, artifacts]);
 
+  // Missing photos are fetched from the web once, then stored in the database.
+  const triedBackfill = useRef(false);
+  useEffect(() => {
+    if (!museum || !artifacts || triedBackfill.current) return;
+    const needsPhotos = !museum.image_url || artifacts.some((a) => !a.image_url);
+    if (!needsPhotos) return;
+    triedBackfill.current = true;
+    void fetch("/api/public/backfill-images", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ museum_id: museum.id }),
+    })
+      .then((res) => res.json())
+      .then((json: { ok?: boolean; filled?: number }) => {
+        if (json?.ok && json.filled) {
+          void queryClient.invalidateQueries({ queryKey: ["museum", slug] });
+          void queryClient.invalidateQueries({ queryKey: ["artifacts", museum.id] });
+        }
+      })
+      .catch(() => {});
+  }, [museum, artifacts, queryClient, slug]);
+
   useEffect(() => {
     if (museum) {
       logEvent("open", museum.id);
@@ -249,12 +271,8 @@ function MuseumPage() {
         </Link>
 
         <header className="mt-6">
-          {photo.url ? (
+          {photo.url && (
             <img src={photo.url} alt={photo.subject || museum.name} className="h-44 w-full rounded-3xl object-cover" />
-          ) : (
-            <div className="flex h-44 w-full items-center justify-center rounded-3xl bg-secondary font-display text-7xl text-primary">
-              {museum.name.charAt(0)}
-            </div>
           )}
           {photo.source && (
             <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
@@ -387,12 +405,8 @@ function MuseumPage() {
                 params={{ slug, ref: a.ref }}
                 className="flex items-center gap-4 rounded-2xl bg-card p-3 shadow-soft transition-transform active:scale-[0.98]"
               >
-                {a.image_url ? (
+                {a.image_url && (
                   <img src={a.image_url} alt="" className="h-16 w-16 shrink-0 rounded-xl object-cover" />
-                ) : (
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-secondary font-display text-2xl text-primary">
-                    {a.title.charAt(0)}
-                  </div>
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium">{a.title}</p>

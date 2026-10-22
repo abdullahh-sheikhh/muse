@@ -68,6 +68,18 @@ function ArtifactPage() {
     void getCachedAudio(data.museum.id, packLang, data.artifact.ref).then(setCachedUrl);
   }, [data]);
 
+  // A missing photo is fetched from the web once, then stored in the database.
+  const triedBackfill = useRef(false);
+  useEffect(() => {
+    if (!data || data.artifact.image_url || triedBackfill.current) return;
+    triedBackfill.current = true;
+    void fetch("/api/public/backfill-images", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ museum_id: data.museum.id }),
+    }).catch(() => {});
+  }, [data]);
+
   if (isLoading) {
     return <main className="flex min-h-screen items-center justify-center bg-warm"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></main>;
   }
@@ -91,12 +103,8 @@ function ArtifactPage() {
           <ArrowLeft className="h-4 w-4" /> {museum.name}
         </Link>
 
-        {artifact.image_url ? (
+        {artifact.image_url && (
           <img src={artifact.image_url} alt={artifact.title} className="mt-6 w-full rounded-3xl object-cover" />
-        ) : (
-          <div className="mt-6 flex h-64 w-full items-center justify-center rounded-3xl bg-secondary font-display text-8xl text-primary">
-            {artifact.title.charAt(0)}
-          </div>
         )}
 
         <header className="mt-6">
@@ -110,6 +118,9 @@ function ArtifactPage() {
             )}
             <span className="rounded-full bg-secondary px-3 py-1 font-medium text-primary">{artifact.ref}</span>
           </div>
+          {artifact.description && (
+            <p className="mt-4 leading-relaxed text-muted-foreground">{artifact.description}</p>
+          )}
         </header>
 
         {src === "qr" && museum.is_partner && (
