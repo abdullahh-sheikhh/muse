@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Download, QrCode, BadgeCheck, Loader2 } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, ArrowRight, Download, QrCode, BadgeCheck, Loader2, Search, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,8 @@ type Artifact = {
   ref: string;
   title: string;
   artist: string;
+  room: string;
+  description: string;
   image_url: string | null;
   sort_order: number;
 };
@@ -45,6 +47,7 @@ type Artifact = {
 function MuseumPage() {
   const { slug } = Route.useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [refInput, setRefInput] = useState("");
   const [refError, setRefError] = useState(false);
   const [scanning, setScanning] = useState(false);
@@ -52,9 +55,12 @@ function MuseumPage() {
   const [progress, setProgress] = useState<number | null>(null);
   const [downloaded, setDownloaded] = useState<string | null>(null);
   const [preferred, setPreferred] = useState("en");
+  const [artSearch, setArtSearch] = useState("");
+  const [importing, setImporting] = useState(false);
 
   const { data: museum, isLoading } = useQuery({
     queryKey: ["museum", slug],
+    staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("museums")
@@ -69,16 +75,51 @@ function MuseumPage() {
   const { data: artifacts } = useQuery({
     queryKey: ["artifacts", museum?.id],
     enabled: !!museum,
+    staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("artifacts")
-        .select("id, ref, title, artist, image_url, sort_order")
+        .select("id, ref, title, artist, room, description, image_url, sort_order")
         .eq("museum_id", museum!.id)
         .order("sort_order");
       if (error) throw error;
       return (data ?? []) as Artifact[];
     },
   });
+
+  const artQuery = artSearch.trim().toLowerCase();
+  const visibleArtifacts = artQuery
+    ? (artifacts ?? []).filter((a) =>
+        `${a.ref} ${a.title} ${a.artist} ${a.room} ${a.description}`.toLowerCase().includes(artQuery),
+      )
+    : (artifacts ?? []);
+
+  async function importArtworks() {
+    if (!museum || importing) return;
+    setImporting(true);
+    try {
+      const res = await fetch("/api/public/import-artworks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ museum_id: museum.id }),
+      });
+      const json = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        error?: string;
+        imported?: number;
+      } | null;
+      if (json?.ok) {
+        await queryClient.invalidateQueries({ queryKey: ["artifacts", museum.id] });
+        if (json.imported) toast.success(`${json.imported} artworks loaded.`);
+      } else {
+        toast.error(json?.error ?? "Couldn't load artworks");
+      }
+    } catch {
+      toast.error("Couldn't load artworks right now — try again in a moment.");
+    } finally {
+      setImporting(false);
+    }
+  }
 
   useEffect(() => {
     if (museum) {
@@ -318,8 +359,19 @@ function MuseumPage() {
 
         <section className="mt-10">
           <h2 className="text-2xl">Artworks</h2>
+          {(artifacts?.length ?? 0) > 0 && (
+            <div className="relative mt-4">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={artSearch}
+                onChange={(e) => setArtSearch(e.target.value)}
+                placeholder="Search by name, artist, room or number…"
+                className="h-12 rounded-xl pl-11"
+              />
+            </div>
+          )}
           <div className="mt-4 space-y-3">
-            {artifacts?.map((a) => (
+            {visibleArtifacts.map((a) => (
               <Link
                 key={a.id}
                 to="/museum/$slug/artifact/$ref"
@@ -343,7 +395,21 @@ function MuseumPage() {
               </Link>
             ))}
             {artifacts?.length === 0 && (
-              <p className="text-muted-foreground">No artworks listed yet.</p>
+              <div className="rounded-2xl bg-card p-5 text-center shadow-soft">
+                <p className="text-muted-foreground">No artworks listed yet.</p>
+                <Button
+                  variant="secondary"
+                  className="mt-4 h-12 w-full rounded-xl"
+                  onClick={importArtworks}
+                  disabled={importing}
+                >
+                  {importing ? <Loader2 className="animate-spin" /> : <Sparkles />}
+                  {importing ? "Finding artworks…" : "Load artworks from the web"}
+                </Button>
+              </div>
+            )}
+            {artQuery && visibleArtifacts.length === 0 && (artifacts?.length ?? 0) > 0 && (
+              <p className="text-muted-foreground">Nothing matches “{artSearch.trim()}”.</p>
             )}
           </div>
         </section>

@@ -1,9 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { MapPin, Search, Loader2, ChevronRight } from "lucide-react";
+import { MapPin, Search, Loader2, ChevronRight, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
+import { Input } from "@/components/ui/input";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { saveLocation } from "@/lib/visitor";
 import { museumPhoto } from "@/lib/museum-photos";
@@ -27,10 +28,14 @@ function Welcome() {
   const [city, setCity] = useState("");
   const [step, setStep] = useState<"country" | "city" | "museum">("country");
   const [busy, setBusy] = useState<"geo" | null>(null);
+  const [search, setSearch] = useState("");
+  const [searching, setSearching] = useState(false);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { data: all = [] } = useQuery({
     queryKey: ["museum-directory"],
+    staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("museums")
@@ -44,12 +49,44 @@ function Welcome() {
   const countries = [...new Set(all.map((m) => m.country).filter(Boolean))].sort();
   const cities = [...new Set(all.filter((m) => m.country === country).map((m) => m.city).filter(Boolean))].sort();
   const cityMuseums = all.filter((m) => m.country === country && m.city === city);
+  const q = search.trim().toLowerCase();
+  const searchHits = q
+    ? all.filter((m) => `${m.name} ${m.city} ${m.country}`.toLowerCase().includes(q))
+    : [];
   const rows =
     step === "country"
       ? countries.map((c) => ({ label: c, image: null as string | null }))
       : step === "city"
         ? cities.map((c) => ({ label: c, image: null as string | null }))
         : cityMuseums.map((m) => ({ label: m.name, image: museumPhoto(m.slug, m.image_url).url }));
+
+  async function searchTheWeb() {
+    const query = search.trim();
+    if (query.length < 3 || searching) return;
+    setSearching(true);
+    try {
+      const res = await fetch("/api/public/discover-museum", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query }),
+      });
+      const json = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        error?: string;
+        museum?: { slug: string; name: string };
+      } | null;
+      if (json?.ok && json.museum) {
+        await queryClient.invalidateQueries({ queryKey: ["museum-directory"] });
+        navigate({ to: "/museum/$slug", params: { slug: json.museum.slug } });
+      } else {
+        toast.error(json?.error ?? "No museum found for that search");
+      }
+    } catch {
+      toast.error("Couldn't search right now — try again in a moment.");
+    } finally {
+      setSearching(false);
+    }
+  }
 
   function useMyLocation() {
     if (!("geolocation" in navigator)) {
@@ -100,6 +137,60 @@ function Welcome() {
             <div className="flex items-center gap-2 text-sm font-medium">
               <Search className="h-4 w-4 text-primary" /> Or choose a museum
             </div>
+            <form
+              className="mt-4 flex gap-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (searchHits[0]) {
+                  navigate({ to: "/museum/$slug", params: { slug: searchHits[0].slug } });
+                } else {
+                  void searchTheWeb();
+                }
+              }}
+            >
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search any museum or city…"
+                className="h-12 rounded-xl"
+              />
+              {q && searchHits.length === 0 && (
+                <Button
+                  type="submit"
+                  size="icon"
+                  variant="secondary"
+                  className="h-12 w-12 shrink-0 rounded-xl"
+                  disabled={searching}
+                  aria-label="Search the web for this museum"
+                >
+                  {searching ? <Loader2 className="animate-spin" /> : <Globe />}
+                </Button>
+              )}
+            </form>
+            {q && (
+              <ul className="mt-3 space-y-2">
+                {searchHits.slice(0, 5).map((m) => (
+                  <li key={m.slug}>
+                    <button
+                      type="button"
+                      onClick={() => navigate({ to: "/museum/$slug", params: { slug: m.slug } })}
+                      className="flex min-h-12 w-full items-center gap-3 rounded-2xl border border-border bg-background px-3 text-left transition-all active:scale-[0.98]"
+                    >
+                      <span className="min-w-0 flex-1 truncate font-medium">{m.name}</span>
+                      <span className="shrink-0 text-xs text-muted-foreground">
+                        {m.city}
+                        {m.country ? `, ${m.country}` : ""}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+                {searchHits.length === 0 && (
+                  <li className="px-1 text-sm text-muted-foreground">
+                    Not in our directory yet — tap the globe to find it on the web and add it.
+                  </li>
+                )}
+              </ul>
+            )}
             <div className="mt-4 grid grid-cols-3 gap-1 rounded-2xl bg-secondary p-1">
               {(["country", "city", "museum"] as const).map((s, i) => {
                 const enabled = s === "country" || (s === "city" && !!country) || (s === "museum" && !!city);
