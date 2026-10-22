@@ -10,3 +10,5 @@
 <!-- LOVABLE:END -->
 
 - Guide audio is generated server-side (translate + text-to-speech) one language per call in `src/lib/audio.functions.ts`, stored in the private `audio` bucket, and served to visitors via the redirecting signed-URL route `/api/public/audio/$id` — public buckets are blocked and iOS needs range-capable URLs.
+- Muse is the visitor-facing PWA (routes `/`, `/museums`, `/museum/$slug`, `/museum/$slug_/artifact/$ref`); visitors use Supabase anonymous auth via `ensureVisitor()` in `src/lib/visitor.ts`, which also owns location storage, preferred language, visit_events logging, and the Cache API audio packs. The artwork route file uses the trailing-underscore form so it is NOT nested under the museum page (which has no `<Outlet />`).
+- On-demand artwork audio comes from the public server route `/api/public/artwork-guide` (script via `writeGuideScript` + `synthesize` in `src/lib/ai.server.ts`, WAV in the private `audio` bucket, short-lived signed URL returned directly); pack downloads get per-file signed URLs from `/api/public/pack-urls/$packId`.
