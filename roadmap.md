@@ -16,4 +16,6 @@
 - [x] Remove unrelated and generated museum photos from every museum view.
 - [x] Galerie Saint-Roch: use its actual interior photo from the official gallery website.
 - [x] Correct Musée Lumière to Lyon and replace the fictional Maison des Brumes with Musée des Beaux-Arts de Lyon; add exact museum photos and verify selection.
-- [ ] Ask the guide live voice agent — deferred by user (integrate later; agent_messages table already exists)
+- [ ] Live Pro voice guide: authenticated partner gate, context, conversation messages, microphone UI, five-minute sessions
+- [ ] Pro QR artwork CTA and QR flow verification
+- [ ] Verify voice agent configuration, health, tests and authenticated browser flow
