@@ -53,7 +53,7 @@ function LiveGuide({ artworkId, museumId, artworkTitle }: Props) {
       writeQueue.current = writeQueue.current.then(async () => {
         const { error: saveError } = await supabase.from("agent_messages").insert({ museum_id: museumId, artwork_id: artworkId, visitor_id: visitorId.current, conversation_id: id || null, role, text: message.message, language });
         if (saveError) toast.error("Couldn't save this conversation turn");
-      }).catch(() => toast.error("Couldn't save this conversation turn"));
+      }).catch(() => { toast.error("Couldn't save this conversation turn"); });
       if (role === "user") void logEvent("question", museumId, artworkId);
     },
   });
