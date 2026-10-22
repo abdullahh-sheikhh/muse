@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { AskGuide } from "@/components/AskGuide";
 import { getCachedAudio, getDownloadedPack, getPreferredLanguage, logEvent } from "@/lib/visitor";
 
-export const Route = createFileRoute("/museum/$slug/artifact/$ref")({
+export const Route = createFileRoute("/museum/$slug_/artifact/$ref")({
   head: () => ({
     meta: [
       { title: "Artwork — Muse" },
