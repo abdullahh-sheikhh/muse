@@ -53,7 +53,8 @@ export const Route = createFileRoute("/api/public/artwork-guide")({
             .eq("artwork_id", artworkId)
             .eq("language", language)
             .maybeSingle();
-          if (cached) {
+          // Narration with audio is final; narration without audio retries the voice below.
+          if (cached?.audio_path) {
             const { sources } = await loadSources();
             return Response.json({
               ok: true,
@@ -103,7 +104,8 @@ export const Route = createFileRoute("/api/public/artwork-guide")({
           const factList = facts.length
             ? facts
             : [`"${art.title}"${art.artist ? ` by ${art.artist}` : ""}${art.year ? `, ${art.year}` : ""}${museumName ? `, shown at ${museumName}` : ""}.`];
-          const script = await g.writeNarration(aiKey, art, factList, g.languageName(language));
+          const script =
+            cached?.script_text ?? (await g.writeNarration(aiKey, art, factList, g.languageName(language)));
 
           // d+e) speech, upload, cache
           let audioPath: string | null = null;

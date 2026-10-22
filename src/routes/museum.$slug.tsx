@@ -80,20 +80,6 @@ function MuseumPage() {
     },
   });
 
-  const { data: packs } = useQuery({
-    queryKey: ["audio-packs", museum?.id],
-    enabled: !!museum?.is_partner,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("audio_packs")
-        .select("id, language, status")
-        .eq("museum_id", museum!.id)
-        .eq("status", "ready");
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-
   useEffect(() => {
     if (museum) {
       logEvent("open", museum.id);
@@ -117,20 +103,37 @@ function MuseumPage() {
     }
   }
 
-  async function downloadPack(packId: string, language: string) {
-    if (!museum) return;
+  async function downloadPack(language: string) {
+    if (!museum || !artifacts?.length) return;
     setPickerOpen(false);
     setProgress(0);
     try {
-      const res = await fetch(`/api/public/pack-urls/${packId}`);
-      if (!res.ok) throw new Error();
-      const { files } = (await res.json()) as { files: { ref: string; url: string }[] };
-      await cachePackAudio(museum.id, language, files, setProgress);
+      // Prepare every artwork's guide (generated once, then cached server-side), half the bar.
+      const files: { ref: string; url: string }[] = [];
+      let prepared = 0;
+      const queue = [...artifacts];
+      const worker = async () => {
+        for (let a = queue.shift(); a; a = queue.shift()) {
+          const res = await fetch("/api/public/artwork-guide", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ artwork_id: a.id, language }),
+          });
+          const json = (await res.json().catch(() => null)) as { ok?: boolean; audio_url?: string | null } | null;
+          if (json?.ok && json.audio_url) files.push({ ref: a.ref, url: json.audio_url });
+          prepared += 1;
+          setProgress((prepared / artifacts.length) * 0.5);
+        }
+      };
+      await Promise.all([worker(), worker(), worker()]);
+      if (files.length === 0) throw new Error();
+      await cachePackAudio(museum.id, language, files, (f) => setProgress(0.5 + f * 0.5));
       await setPreferredLanguage(language);
       setPreferred(language);
       setDownloaded(language);
       toast.success(`Guide downloaded — it now works offline in ${lang(language).english}.`);
-    } catch {
+    } catch (err) {
+      console.error("[download]", err);
       toast.error("Download failed. Check your connection and try again.");
     } finally {
       setProgress(null);
@@ -206,8 +209,7 @@ function MuseumPage() {
         </header>
 
         <section className="mt-8 space-y-3">
-          {museum.is_partner ? (
-            <>
+          <>
               {downloaded ? (
                 <div className="rounded-2xl bg-accent px-5 py-4 text-sm text-accent-foreground">
                   Guide downloaded in {lang(downloaded).name} — works offline.
@@ -216,10 +218,15 @@ function MuseumPage() {
                 <Button
                   className="h-14 w-full rounded-2xl text-base"
                   onClick={() => setPickerOpen(true)}
-                  disabled={progress !== null}
+                  disabled={progress !== null || !artifacts?.length}
                 >
                   <Download /> Download audio guide
                 </Button>
+              )}
+              {progress !== null && (
+                <p className="text-center text-sm text-muted-foreground">
+                  Preparing your offline guide… {Math.round(progress * 100)}%
+                </p>
               )}
               {progress !== null && (
                 <div className="h-2 overflow-hidden rounded-full bg-secondary">
@@ -229,15 +236,16 @@ function MuseumPage() {
                   />
                 </div>
               )}
-              <Button
-                variant="secondary"
-                className="h-14 w-full rounded-2xl text-base"
-                onClick={() => setScanning(true)}
-              >
-                <QrCode /> Scan QR
-              </Button>
+              {museum.is_partner && (
+                <Button
+                  variant="secondary"
+                  className="h-14 w-full rounded-2xl text-base"
+                  onClick={() => setScanning(true)}
+                >
+                  <QrCode /> Scan QR
+                </Button>
+              )}
             </>
-          ) : (
             <label className="block rounded-2xl bg-card p-4 shadow-soft">
               <span className="text-sm text-muted-foreground">Guide language</span>
               <select
@@ -255,7 +263,6 @@ function MuseumPage() {
                 ))}
               </select>
             </label>
-          )}
         </section>
 
         <form onSubmit={lookup} className="mt-6 rounded-3xl bg-card p-5 shadow-soft">
@@ -342,20 +349,17 @@ function MuseumPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-2xl">Choose a language</h2>
-            <div className="mt-4 space-y-2">
-              {packs?.map((p) => (
+            <div className="mt-4 max-h-[60vh] space-y-2 overflow-y-auto">
+              {[preferred, ...LANGUAGES.map((l) => l.code).filter((c) => c !== preferred)].map((code) => (
                 <button
-                  key={p.id}
+                  key={code}
                   type="button"
-                  onClick={() => downloadPack(p.id, p.language)}
+                  onClick={() => downloadPack(code)}
                   className="flex h-14 w-full items-center gap-3 rounded-2xl bg-secondary px-5 text-left text-base"
                 >
-                  <span className="text-xl">{lang(p.language).flag}</span> {lang(p.language).name}
+                  <span className="text-xl">{lang(code).flag}</span> {lang(code).name}
                 </button>
               ))}
-              {packs?.length === 0 && (
-                <p className="text-muted-foreground">No downloadable packs yet.</p>
-              )}
             </div>
           </div>
         </div>
