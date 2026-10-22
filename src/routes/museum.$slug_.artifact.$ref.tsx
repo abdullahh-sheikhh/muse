@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Loader2, QrCode } from "lucide-react";
+import { ArrowLeft, Loader2, QrCode, Mic, Lock } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { AskGuide } from "@/components/AskGuide";
 import { GuidePlayer } from "@/components/GuidePlayer";
@@ -112,18 +113,20 @@ function ArtifactPage() {
         </header>
 
         {src === "qr" && museum.is_partner && (
-          <div className="mt-6 flex items-center gap-3 rounded-2xl bg-accent px-5 py-4 text-sm text-accent-foreground">
-            <QrCode className="h-5 w-5 shrink-0" /> Scanned — tap play to hear this artwork's story.
-          </div>
+           <div className="mt-6 flex flex-col gap-3 rounded-2xl bg-accent px-5 py-4 text-sm text-accent-foreground">
+             <p className="flex items-center gap-2"><QrCode className="h-5 w-5 shrink-0" /> Scanned</p>
+             <Button className="min-h-14 whitespace-normal" onClick={() => document.getElementById("ask-guide")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" })}><Mic />Ask the guide about this artwork</Button>
+           </div>
         )}
 
         <GuidePlayer artworkId={artifact.id} museumId={museum.id} cachedUrl={cachedUrl} />
 
         {museum.is_partner && (
-          <section className="mt-10">
-            <AskGuide />
+           <section id="ask-guide" className="mt-10 scroll-mt-6">
+             <AskGuide key={artifact.id} artworkId={artifact.id} museumId={museum.id} artworkTitle={artifact.title} />
           </section>
         )}
+         {!museum.is_partner && <div className="mt-10 flex items-start gap-3 border-t pt-6 text-sm text-muted-foreground"><Lock className="h-5 w-5 shrink-0" /><p>Ask the guide — available at partner museums (Pro)</p></div>}
       </div>
     </main>
   );
