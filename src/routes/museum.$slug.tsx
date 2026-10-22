@@ -403,7 +403,7 @@ function MuseumPage() {
               </div>
             )}
             {artQuery && visibleArtifacts.length === 0 && (artifacts?.length ?? 0) > 0 && (
-              <p className="text-muted-foreground">Nothing matches “{artSearch.trim()}”.</p>
+              <p className="text-muted-foreground">Nothing matches “{refInput.trim()}”.</p>
             )}
           </div>
         </section>
