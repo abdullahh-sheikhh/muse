@@ -10,11 +10,23 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as StudioIndexRouteImport } from './routes/studio.index'
 import { Route as ApiPublicAudioIdRouteImport } from './routes/api/public/audio.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudioIndexRoute = StudioIndexRouteImport.update({
+  id: '/studio/',
+  path: '/studio/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicAudioIdRoute = ApiPublicAudioIdRouteImport.update({
@@ -25,27 +37,35 @@ const ApiPublicAudioIdRoute = ApiPublicAudioIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/studio/': typeof StudioIndexRoute
   '/api/public/audio/$id': typeof ApiPublicAudioIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/studio': typeof StudioIndexRoute
   '/api/public/audio/$id': typeof ApiPublicAudioIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/studio/': typeof StudioIndexRoute
   '/api/public/audio/$id': typeof ApiPublicAudioIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/public/audio/$id'
+  fullPaths: '/' | '/auth' | '/studio/' | '/api/public/audio/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/public/audio/$id'
-  id: '__root__' | '/' | '/api/public/audio/$id'
+  to: '/' | '/auth' | '/studio' | '/api/public/audio/$id'
+  id: '__root__' | '/' | '/auth' | '/studio/' | '/api/public/audio/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
+  StudioIndexRoute: typeof StudioIndexRoute
   ApiPublicAudioIdRoute: typeof ApiPublicAudioIdRoute
 }
 
@@ -56,6 +76,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/studio/': {
+      id: '/studio/'
+      path: '/studio'
+      fullPath: '/studio/'
+      preLoaderRoute: typeof StudioIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/audio/$id': {
@@ -70,6 +104,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
+  StudioIndexRoute: StudioIndexRoute,
   ApiPublicAudioIdRoute: ApiPublicAudioIdRoute,
 }
 export const routeTree = rootRouteImport
