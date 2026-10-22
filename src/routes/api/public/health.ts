@@ -22,7 +22,7 @@ export const Route = createFileRoute("/api/public/health")({
           if (!v) throw new Error(`${name} is not set`);
           return v;
         };
-        const [elevenlabs_tts, elevenlabs_stt, keenable, llm, storage] = await Promise.all([
+        const [elevenlabs_tts, elevenlabs_stt, keenable, llm, storage, elevenlabs_agent] = await Promise.all([
           check(() =>
             g.elevenTts(need("ELEVENLABS_API_KEY"), process.env["ELEVENLABS_VOICE_ID"] || g.DEFAULT_VOICE_ID, "Hello"),
           ),
@@ -34,9 +34,10 @@ export const Route = createFileRoute("/api/public/health")({
             const { error } = await supabaseAdmin.storage.from("audio").list("", { limit: 1 });
             if (error) throw new Error(error.message);
           }),
+          check(() => g.elevenAgent(need("ELEVENLABS_API_KEY"), need("ELEVENLABS_AGENT_ID"))),
         ]);
         return Response.json(
-          { elevenlabs_tts, elevenlabs_stt, keenable, llm, storage },
+          { elevenlabs_tts, elevenlabs_stt, keenable, llm, storage, elevenlabs_agent },
           { headers: { "Cache-Control": "no-store" } },
         );
       },
