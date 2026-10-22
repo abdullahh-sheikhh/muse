@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, QrCode } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AskGuide } from "@/components/AskGuide";
 import { GuidePlayer } from "@/components/GuidePlayer";
@@ -18,12 +18,16 @@ export const Route = createFileRoute("/museum/$slug_/artifact/$ref")({
       { property: "og:description", content: "Listen to the story of this artwork." },
     ],
   }),
+  validateSearch: (search: Record<string, unknown>): { src?: "qr" } =>
+    search["src"] === "qr" ? { src: "qr" } : {},
   component: ArtifactPage,
 });
 
 function ArtifactPage() {
   const { slug, ref } = Route.useParams();
+  const { src } = Route.useSearch();
   const [cachedUrl, setCachedUrl] = useState<string | null>(null);
+  const qrLogged = useRef(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["artifact", slug, ref],
@@ -46,8 +50,14 @@ function ArtifactPage() {
   });
 
   useEffect(() => {
-    if (data) logEvent("open", data.museum.id, data.artifact.id);
-  }, [data]);
+    if (!data) return;
+    logEvent("open", data.museum.id, data.artifact.id);
+    // QR scans: in-app scanner and phone camera both land here with ?src=qr.
+    if (src === "qr" && data.museum.is_partner && !qrLogged.current) {
+      qrLogged.current = true;
+      logEvent("qr_scan", data.museum.id, data.artifact.id);
+    }
+  }, [data, src]);
 
   // If a pack was downloaded for this museum, offer the cached file first.
   useEffect(() => {
@@ -100,6 +110,12 @@ function ArtifactPage() {
             <span className="rounded-full bg-secondary px-3 py-1 font-medium text-primary">{artifact.ref}</span>
           </div>
         </header>
+
+        {src === "qr" && museum.is_partner && (
+          <div className="mt-6 flex items-center gap-3 rounded-2xl bg-accent px-5 py-4 text-sm text-accent-foreground">
+            <QrCode className="h-5 w-5 shrink-0" /> Scanned — tap play to hear this artwork's story.
+          </div>
+        )}
 
         <GuidePlayer artworkId={artifact.id} museumId={museum.id} cachedUrl={cachedUrl} />
 

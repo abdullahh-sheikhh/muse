@@ -110,3 +110,9 @@
 @utility font-display {
   font-family: var(--font-display);
 }
+
+@media print {
+  @page { size: A4; margin: 12mm; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .qr-sheet { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+}
