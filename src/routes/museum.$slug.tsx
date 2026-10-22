@@ -395,7 +395,21 @@ function MuseumPage() {
               </Link>
             ))}
             {artifacts?.length === 0 && (
-              <p className="text-muted-foreground">No artworks listed yet.</p>
+              <div className="rounded-2xl bg-card p-5 text-center shadow-soft">
+                <p className="text-muted-foreground">No artworks listed yet.</p>
+                <Button
+                  variant="secondary"
+                  className="mt-4 h-12 w-full rounded-xl"
+                  onClick={importArtworks}
+                  disabled={importing}
+                >
+                  {importing ? <Loader2 className="animate-spin" /> : <Sparkles />}
+                  {importing ? "Finding artworks…" : "Load artworks from the web"}
+                </Button>
+              </div>
+            )}
+            {artQuery && visibleArtifacts.length === 0 && (artifacts?.length ?? 0) > 0 && (
+              <p className="text-muted-foreground">Nothing matches “{artSearch.trim()}”.</p>
             )}
           </div>
         </section>
