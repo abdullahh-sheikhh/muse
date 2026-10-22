@@ -132,7 +132,8 @@ function MuseumPage() {
       setPreferred(language);
       setDownloaded(language);
       toast.success(`Guide downloaded — it now works offline in ${lang(language).english}.`);
-    } catch {
+    } catch (err) {
+      console.error("[download]", err);
       toast.error("Download failed. Check your connection and try again.");
     } finally {
       setProgress(null);
