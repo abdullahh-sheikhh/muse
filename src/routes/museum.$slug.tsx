@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, Download, QrCode, BadgeCheck, Loader2, Search, Sparkles } from "lucide-react";
 import { toast } from "sonner";
@@ -56,6 +56,8 @@ function MuseumPage() {
   const [downloaded, setDownloaded] = useState<string | null>(null);
   const [preferred, setPreferred] = useState("en");
   const [importing, setImporting] = useState(false);
+  const [importFailed, setImportFailed] = useState(false);
+  const triedImport = useRef(false);
 
   const { data: museum, isLoading } = useQuery({
     queryKey: ["museum", slug],
