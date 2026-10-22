@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { QrScanner } from "@/components/QrScanner";
 import { LANGUAGES, lang } from "@/lib/languages";
+import { museumPhoto } from "@/lib/museum-photos";
 import {
   cachePackAudio,
   getDownloadedPack,
@@ -165,6 +166,8 @@ function MuseumPage() {
     );
   }
 
+  const photo = museumPhoto(slug, museum.image_url);
+
   return (
     <main className="min-h-screen bg-warm">
       <div className="mx-auto max-w-md px-6 pb-12 pt-[max(env(safe-area-inset-top),1.5rem)]">
@@ -173,12 +176,18 @@ function MuseumPage() {
         </Link>
 
         <header className="mt-6">
-          {museum.image_url ? (
-            <img src={museum.image_url} alt="" className="h-44 w-full rounded-3xl object-cover" />
+          {photo.url ? (
+            <img src={photo.url} alt={photo.subject || museum.name} className="h-44 w-full rounded-3xl object-cover" />
           ) : (
             <div className="flex h-44 w-full items-center justify-center rounded-3xl bg-secondary font-display text-7xl text-primary">
               {museum.name.charAt(0)}
             </div>
+          )}
+          {photo.illustrative && (
+            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+              Illustrative photo: {photo.subject}.{" "}
+              <a href={photo.source} target="_blank" rel="noreferrer" className="underline">{photo.credit}</a>
+            </p>
           )}
           <div className="mt-4 flex items-start justify-between gap-3">
             <div>

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { MapPin, BadgeCheck, Landmark } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { loadLocation, type VisitorLocation } from "@/lib/visitor";
+import { museumPhoto } from "@/lib/museum-photos";
 
 export const Route = createFileRoute("/museums")({
   head: () => ({
@@ -80,9 +81,9 @@ function MuseumsPage() {
               params={{ slug: m.slug }}
               className="flex gap-4 rounded-3xl bg-card p-4 shadow-soft transition-transform active:scale-[0.98]"
             >
-              {m.image_url ? (
+              {museumPhoto(m.slug, m.image_url).url ? (
                 <img
-                  src={m.image_url}
+                  src={museumPhoto(m.slug, m.image_url).url ?? undefined}
                   alt=""
                   className="h-24 w-24 shrink-0 rounded-2xl object-cover"
                 />

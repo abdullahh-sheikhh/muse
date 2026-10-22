@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { saveLocation } from "@/lib/visitor";
+import { museumPhoto } from "@/lib/museum-photos";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -48,7 +49,7 @@ function Welcome() {
       ? countries.map((c) => ({ label: c, image: null as string | null }))
       : step === "city"
         ? cities.map((c) => ({ label: c, image: null as string | null }))
-        : cityMuseums.map((m) => ({ label: m.name, image: m.image_url }));
+        : cityMuseums.map((m) => ({ label: m.name, image: museumPhoto(m.slug, m.image_url).url }));
 
   function useMyLocation() {
     if (!("geolocation" in navigator)) {
@@ -139,7 +140,8 @@ function Welcome() {
                           setCity(row.label);
                           setStep("museum");
                         } else {
-                          navigate({ to: "/museum/$slug", params: { slug: cityMuseums[idx]!.slug } });
+                          const museum = cityMuseums[idx];
+                          if (museum) navigate({ to: "/museum/$slug", params: { slug: museum.slug } });
                         }
                       }}
                       className={`flex min-h-14 w-full items-center gap-3 rounded-2xl border px-3 text-left text-lg font-display transition-all active:scale-[0.98] ${
