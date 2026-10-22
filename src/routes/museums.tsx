@@ -8,6 +8,8 @@ import { loadLocation, type VisitorLocation } from "@/lib/visitor";
 export const Route = createFileRoute("/museums")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Museums near you — Muse" },
       { name: "description", content: "Museums near you with AI audio guides." },
       { property: "og:title", content: "Museums near you — Muse" },

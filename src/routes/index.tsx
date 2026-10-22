@@ -10,6 +10,8 @@ import { saveLocation } from "@/lib/visitor";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Muse — Your AI museum audio guide" },
       { name: "description", content: "Scan, listen, and ask — Muse turns every museum visit into a personal guided tour, in your language." },
       { property: "og:title", content: "Muse — Your AI museum audio guide" },

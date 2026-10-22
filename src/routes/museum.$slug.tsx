@@ -19,6 +19,8 @@ import {
 export const Route = createFileRoute("/museum/$slug")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Museum guide — Muse" },
       { name: "description", content: "Listen to the stories behind every artwork." },
       { property: "og:title", content: "Museum guide — Muse" },

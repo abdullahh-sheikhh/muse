@@ -11,6 +11,8 @@ import { useAuth } from "@/hooks/useAuth";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Sign in — ADI Studio" },
       { name: "description", content: "Sign in to create and manage your museum audioguides." },
       { property: "og:title", content: "Sign in — ADI Studio" },
