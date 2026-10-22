@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { LANGUAGES, lang } from "@/lib/languages";
+import { QrSheet } from "@/components/QrSheet";
 import type { Tables } from "@/integrations/supabase/types";
 
 export const Route = createFileRoute("/studio/$museumId")({
@@ -43,20 +44,42 @@ function MuseumEditor() {
       return { museum: m.data, stops: s.data ?? [], audio: a.data ?? [] };
     },
   });
+  const [tab, setTab] = useState<"stops" | "qr">("stops");
   const refresh = () => qc.invalidateQueries({ queryKey: ["museum", museumId] });
 
   if (!user || !q.data) return <div className="p-10 text-muted-foreground">Loading…</div>;
   const { museum, stops, audio } = q.data;
+  const showQr = museum.is_partner && tab === "qr";
   const nextNumber = (stops.at(-1)?.number ?? 0) + 1;
 
   return (
     <main className="min-h-screen">
       <div className="mx-auto max-w-3xl px-5 pb-20 pt-8">
-        <Link to="/studio" className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+        <Link to="/studio" className="print:hidden inline-flex items-center gap-1 text-sm text-muted-foreground">
           <ArrowLeft className="h-4 w-4" /> Museums
         </Link>
         <h1 className="mt-4 text-5xl">{museum.name}</h1>
+        <div className="print:hidden">
         <MuseumSettings museum={museum} onSaved={refresh} />
+        {museum.is_partner && (
+          <div className="mt-10 inline-flex rounded-2xl bg-secondary p-1">
+            {(["stops", "qr"] as const).map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setTab(t)}
+                className={`h-11 rounded-xl px-5 text-sm ${tab === t ? "bg-primary text-primary-foreground" : "text-secondary-foreground"}`}
+              >
+                {t === "stops" ? "Stops" : "QR codes"}
+              </button>
+            ))}
+          </div>
+        )}
+        </div>
+        {showQr ? (
+          <QrSheet museumId={museum.id} slug={museum.slug} />
+        ) : (
+        <>
 
         <h2 className="mt-12 text-3xl">Stops</h2>
         <p className="text-sm text-muted-foreground">
@@ -78,6 +101,8 @@ function MuseumEditor() {
         >
           <Plus /> Add stop {nextNumber}
         </Button>
+        </>
+        )}
       </div>
     </main>
   );
