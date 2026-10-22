@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, Download, QrCode, BadgeCheck, Loader2, Search, Sparkles } from "lucide-react";
 import { toast } from "sonner";
@@ -56,6 +56,8 @@ function MuseumPage() {
   const [downloaded, setDownloaded] = useState<string | null>(null);
   const [preferred, setPreferred] = useState("en");
   const [importing, setImporting] = useState(false);
+  const [importFailed, setImportFailed] = useState(false);
+  const triedImport = useRef(false);
 
   const { data: museum, isLoading } = useQuery({
     queryKey: ["museum", slug],
@@ -96,6 +98,7 @@ function MuseumPage() {
   async function importArtworks() {
     if (!museum || importing) return;
     setImporting(true);
+    setImportFailed(false);
     try {
       const res = await fetch("/api/public/import-artworks", {
         method: "POST",
@@ -111,14 +114,25 @@ function MuseumPage() {
         await queryClient.invalidateQueries({ queryKey: ["artifacts", museum.id] });
         if (json.imported) toast.success(`${json.imported} artworks loaded.`);
       } else {
+        setImportFailed(true);
         toast.error(json?.error ?? "Couldn't load artworks");
       }
     } catch {
+      setImportFailed(true);
       toast.error("Couldn't load artworks right now — try again in a moment.");
     } finally {
       setImporting(false);
     }
   }
+
+  // A museum with no artworks yet fills itself from the web on first visit.
+  useEffect(() => {
+    if (museum && artifacts && artifacts.length === 0 && !triedImport.current) {
+      triedImport.current = true;
+      void importArtworks();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [museum, artifacts]);
 
   useEffect(() => {
     if (museum) {
@@ -391,16 +405,23 @@ function MuseumPage() {
             ))}
             {artifacts?.length === 0 && (
               <div className="rounded-2xl bg-card p-5 text-center shadow-soft">
-                <p className="text-muted-foreground">No artworks listed yet.</p>
-                <Button
-                  variant="secondary"
-                  className="mt-4 h-12 w-full rounded-xl"
-                  onClick={importArtworks}
-                  disabled={importing}
-                >
-                  {importing ? <Loader2 className="animate-spin" /> : <Sparkles />}
-                  {importing ? "Finding artworks…" : "Load artworks from the web"}
-                </Button>
+                {importing || !importFailed ? (
+                  <p className="flex items-center justify-center gap-2 text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" /> Finding this museum's artworks…
+                  </p>
+                ) : (
+                  <>
+                    <p className="text-muted-foreground">No artworks listed yet.</p>
+                    <Button
+                      variant="secondary"
+                      className="mt-4 h-12 w-full rounded-xl"
+                      onClick={importArtworks}
+                      disabled={importing}
+                    >
+                      <Sparkles /> Try loading artworks again
+                    </Button>
+                  </>
+                )}
               </div>
             )}
             {artQuery && visibleArtifacts.length === 0 && (artifacts?.length ?? 0) > 0 && (
