@@ -12,3 +12,4 @@
 - [x] Server route for pack download signed URLs
 - [x] visit_events logging (number_entry, qr_scan, open, play)
 - [x] Verify: build, tests, browser smoke test
+- [x] Museum cover photos: demo images hosted as app assets, shown in the picker list and museum header

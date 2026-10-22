@@ -31,7 +31,7 @@ function Welcome() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("museums")
-        .select("name, slug, city, country")
+        .select("name, slug, city, country, image_url")
         .order("name");
       if (error) throw error;
       return data ?? [];
@@ -41,6 +41,12 @@ function Welcome() {
   const countries = [...new Set(all.map((m) => m.country).filter(Boolean))].sort();
   const cities = [...new Set(all.filter((m) => m.country === country).map((m) => m.city).filter(Boolean))].sort();
   const cityMuseums = all.filter((m) => m.country === country && m.city === city);
+  const rows =
+    step === "country"
+      ? countries.map((c) => ({ label: c, image: null as string | null }))
+      : step === "city"
+        ? cities.map((c) => ({ label: c, image: null as string | null }))
+        : cityMuseums.map((m) => ({ label: m.name, image: m.image_url }));
 
   function useMyLocation() {
     if (!("geolocation" in navigator)) {
@@ -115,36 +121,44 @@ function Welcome() {
               key={step}
               className="mt-4 max-h-80 space-y-2 overflow-y-auto overscroll-contain animate-in fade-in slide-in-from-right-4 duration-300"
             >
-              {(step === "country" ? countries : step === "city" ? cities : cityMuseums.map((m) => m.name)).map(
-                (item, idx) => {
-                  const selected = (step === "country" && item === country) || (step === "city" && item === city);
-                  return (
-                    <li key={item + idx}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (step === "country") {
-                            setCountry(item);
-                            setCity("");
-                            setStep("city");
-                          } else if (step === "city") {
-                            setCity(item);
-                            setStep("museum");
-                          } else {
-                            navigate({ to: "/museum/$slug", params: { slug: cityMuseums[idx]!.slug } });
-                          }
-                        }}
-                        className={`flex min-h-14 w-full items-center justify-between rounded-2xl border px-4 text-left text-lg font-display transition-all active:scale-[0.98] ${
-                          selected ? "border-primary bg-primary/10" : "border-border bg-background"
-                        }`}
-                      >
-                        {item}
-                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                      </button>
-                    </li>
-                  );
-                },
-              )}
+              {rows.map((row, idx) => {
+                const selected =
+                  (step === "country" && row.label === country) || (step === "city" && row.label === city);
+                return (
+                  <li key={row.label + idx}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (step === "country") {
+                          setCountry(row.label);
+                          setCity("");
+                          setStep("city");
+                        } else if (step === "city") {
+                          setCity(row.label);
+                          setStep("museum");
+                        } else {
+                          navigate({ to: "/museum/$slug", params: { slug: cityMuseums[idx]!.slug } });
+                        }
+                      }}
+                      className={`flex min-h-14 w-full items-center gap-3 rounded-2xl border px-3 text-left text-lg font-display transition-all active:scale-[0.98] ${
+                        selected ? "border-primary bg-primary/10" : "border-border bg-background"
+                      }`}
+                    >
+                      {row.image ? (
+                        <img
+                          src={row.image}
+                          alt=""
+                          loading="lazy"
+                          onError={(e) => e.currentTarget.classList.add("hidden")}
+                          className="h-12 w-12 shrink-0 rounded-xl object-cover"
+                        />
+                      ) : null}
+                      <span className="min-w-0 flex-1 truncate">{row.label}</span>
+                      <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </div>
