@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { MapPin, Search, Loader2 } from "lucide-react";
+import { MapPin, Search, Loader2, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
@@ -90,46 +90,61 @@ function Welcome() {
             <div className="flex items-center gap-2 text-sm font-medium">
               <Search className="h-4 w-4 text-primary" /> Or choose a museum
             </div>
-            <div className="mt-3 space-y-3">
-              <select
-                aria-label="Country"
-                value={country}
-                onChange={(e) => {
-                  setCountry(e.target.value);
-                  setCity("");
-                }}
-                className="h-12 w-full rounded-xl border border-input bg-background px-3 text-base"
-              >
-                <option value="">Select a country</option>
-                {countries.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-              <select
-                aria-label="City"
-                value={city}
-                disabled={!country}
-                onChange={(e) => setCity(e.target.value)}
-                className="h-12 w-full rounded-xl border border-input bg-background px-3 text-base disabled:opacity-50"
-              >
-                <option value="">Select a city</option>
-                {cities.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-              <select
-                aria-label="Museum"
-                value=""
-                disabled={!city}
-                onChange={(e) => e.target.value && navigate({ to: "/museum/$slug", params: { slug: e.target.value } })}
-                className="h-12 w-full rounded-xl border border-input bg-background px-3 text-base disabled:opacity-50"
-              >
-                <option value="">Select a museum</option>
-                {cityMuseums.map((m) => (
-                  <option key={m.slug} value={m.slug}>{m.name}</option>
-                ))}
-              </select>
+            <div className="mt-4 grid grid-cols-3 gap-1 rounded-2xl bg-secondary p-1">
+              {(["country", "city", "museum"] as const).map((s, i) => {
+                const enabled = s === "country" || (s === "city" && !!country) || (s === "museum" && !!city);
+                const label = s === "country" ? country || "Country" : s === "city" ? city || "City" : "Museum";
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    disabled={!enabled}
+                    onClick={() => setStep(s)}
+                    className={`truncate rounded-xl px-2 py-2.5 text-sm font-medium transition-colors disabled:opacity-40 ${
+                      step === s ? "bg-primary text-primary-foreground shadow-soft" : "text-muted-foreground"
+                    }`}
+                  >
+                    <span className="mr-1 opacity-60">{i + 1}.</span>
+                    {label}
+                  </button>
+                );
+              })}
             </div>
+            <ul
+              key={step}
+              className="mt-4 max-h-80 space-y-2 overflow-y-auto overscroll-contain animate-in fade-in slide-in-from-right-4 duration-300"
+            >
+              {(step === "country" ? countries : step === "city" ? cities : cityMuseums.map((m) => m.name)).map(
+                (item, idx) => {
+                  const selected = (step === "country" && item === country) || (step === "city" && item === city);
+                  return (
+                    <li key={item + idx}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (step === "country") {
+                            setCountry(item);
+                            setCity("");
+                            setStep("city");
+                          } else if (step === "city") {
+                            setCity(item);
+                            setStep("museum");
+                          } else {
+                            navigate({ to: "/museum/$slug", params: { slug: cityMuseums[idx].slug } });
+                          }
+                        }}
+                        className={`flex min-h-14 w-full items-center justify-between rounded-2xl border px-4 text-left text-lg font-display transition-all active:scale-[0.98] ${
+                          selected ? "border-primary bg-primary/10" : "border-border bg-background"
+                        }`}
+                      >
+                        {item}
+                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                      </button>
+                    </li>
+                  );
+                },
+              )}
+            </ul>
           </div>
         </div>
 
