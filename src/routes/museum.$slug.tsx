@@ -55,7 +55,6 @@ function MuseumPage() {
   const [progress, setProgress] = useState<number | null>(null);
   const [downloaded, setDownloaded] = useState<string | null>(null);
   const [preferred, setPreferred] = useState("en");
-  const [artSearch, setArtSearch] = useState("");
   const [importing, setImporting] = useState(false);
 
   const { data: museum, isLoading } = useQuery({
@@ -87,7 +86,7 @@ function MuseumPage() {
     },
   });
 
-  const artQuery = artSearch.trim().toLowerCase();
+  const artQuery = refInput.trim().toLowerCase();
   const visibleArtifacts = artQuery
     ? (artifacts ?? []).filter((a) =>
         `${a.ref} ${a.title} ${a.artist} ${a.room} ${a.description}`.toLowerCase().includes(artQuery),
@@ -134,12 +133,19 @@ function MuseumPage() {
     const ref = (spoken ?? refInput).trim();
     if (!ref || !museum) return;
     setRefError(false);
+    // Exact catalogue-number match jumps straight to the artwork.
     const { data, error } = await supabase.rpc("lookup_artifact", { _slug: slug, _ref: ref });
     const hit = !error ? data?.[0] : undefined;
     if (hit?.artifact_ref) {
       logEvent("number_entry", museum.id);
       navigate({ to: "/museum/$slug/artifact/$ref", params: { slug, ref: hit.artifact_ref } });
-    } else {
+      return;
+    }
+    // Otherwise the list is already filtered live; a single match opens directly.
+    const only = visibleArtifacts.length === 1 ? visibleArtifacts[0] : undefined;
+    if (only) {
+      navigate({ to: "/museum/$slug/artifact/$ref", params: { slug, ref: only.ref } });
+    } else if (visibleArtifacts.length === 0) {
       setRefError(true);
     }
   }
@@ -315,10 +321,11 @@ function MuseumPage() {
 
         <form onSubmit={lookup} className="mt-6 rounded-3xl bg-card p-5 shadow-soft">
           <label className="text-sm font-medium" htmlFor="ref-input">
-            {museum.ref_label}
+            Search artworks
           </label>
           <div className="mt-3 flex gap-2">
             <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 id="ref-input"
                 value={refInput}
@@ -326,9 +333,8 @@ function MuseumPage() {
                   setRefInput(e.target.value);
                   setRefError(false);
                 }}
-                placeholder="As printed on the label"
-                className="h-12 rounded-xl pr-12"
-                autoCapitalize="characters"
+                placeholder={`Name, artist, room or ${museum.ref_label.toLowerCase()}`}
+                className="h-12 rounded-xl pl-11 pr-12"
               />
               <RefMicButton
                 onFail={() => document.getElementById("ref-input")?.focus()}
@@ -354,22 +360,11 @@ function MuseumPage() {
               <ArrowRight />
             </Button>
           </div>
-          {refError && <p className="mt-2 text-sm text-destructive">Number not found. Check the label.</p>}
+          {refError && <p className="mt-2 text-sm text-destructive">Nothing found. Check the label or try another word.</p>}
         </form>
 
         <section className="mt-10">
           <h2 className="text-2xl">Artworks</h2>
-          {(artifacts?.length ?? 0) > 0 && (
-            <div className="relative mt-4">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={artSearch}
-                onChange={(e) => setArtSearch(e.target.value)}
-                placeholder="Search by name, artist, room or number…"
-                className="h-12 rounded-xl pl-11"
-              />
-            </div>
-          )}
           <div className="mt-4 space-y-3">
             {visibleArtifacts.map((a) => (
               <Link
@@ -409,7 +404,7 @@ function MuseumPage() {
               </div>
             )}
             {artQuery && visibleArtifacts.length === 0 && (artifacts?.length ?? 0) > 0 && (
-              <p className="text-muted-foreground">Nothing matches “{artSearch.trim()}”.</p>
+              <p className="text-muted-foreground">Nothing matches “{refInput.trim()}”.</p>
             )}
           </div>
         </section>
