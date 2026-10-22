@@ -3,7 +3,8 @@ import { useState } from "react";
 import { MapPin, Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { saveLocation } from "@/lib/visitor";
 
 export const Route = createFileRoute("/")({
@@ -19,13 +20,30 @@ export const Route = createFileRoute("/")({
 });
 
 function Welcome() {
+  const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
-  const [busy, setBusy] = useState<"geo" | "city" | null>(null);
+  const [busy, setBusy] = useState<"geo" | null>(null);
   const navigate = useNavigate();
+
+  const { data: all = [] } = useQuery({
+    queryKey: ["museum-directory"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("museums")
+        .select("name, slug, city, country")
+        .order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const countries = [...new Set(all.map((m) => m.country).filter(Boolean))].sort();
+  const cities = [...new Set(all.filter((m) => m.country === country).map((m) => m.city).filter(Boolean))].sort();
+  const cityMuseums = all.filter((m) => m.country === country && m.city === city);
 
   function useMyLocation() {
     if (!("geolocation" in navigator)) {
-      toast.error("Your browser can't share your location — search for your city instead.");
+      toast.error("Your browser can't share your location — choose a museum below instead.");
       return;
     }
     setBusy("geo");
@@ -36,30 +54,10 @@ function Welcome() {
       },
       () => {
         setBusy(null);
-        toast.error("Couldn't get your location — search for your city instead.");
+        toast.error("Couldn't get your location — choose a museum below instead.");
       },
       { timeout: 10000 },
     );
-  }
-
-  async function searchCity(e: React.FormEvent) {
-    e.preventDefault();
-    const q = city.trim();
-    if (!q) return;
-    setBusy("city");
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`,
-      );
-      const results = (await res.json()) as { lat: string; lon: string; display_name: string }[];
-      const r = results[0];
-      if (!r) throw new Error("not found");
-      saveLocation({ lat: Number(r.lat), lng: Number(r.lon), label: r.display_name.split(",")[0] ?? q });
-      navigate({ to: "/museums" });
-    } catch {
-      toast.error("City not found — try a nearby larger city.");
-      setBusy(null);
-    }
   }
 
   return (
@@ -88,27 +86,51 @@ function Welcome() {
             Use my location
           </Button>
 
-          <form onSubmit={searchCity} className="rounded-3xl bg-card p-5 shadow-soft">
+          <div className="rounded-3xl bg-card p-5 shadow-soft">
             <div className="flex items-center gap-2 text-sm font-medium">
-              <Search className="h-4 w-4 text-primary" /> Or find your city
+              <Search className="h-4 w-4 text-primary" /> Or choose a museum
             </div>
-            <div className="mt-3 flex gap-2">
-              <Input
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder="Paris, Lyon, …"
-                className="h-12 rounded-xl"
-              />
-              <Button
-                type="submit"
-                variant="secondary"
-                className="h-12 rounded-xl px-5"
-                disabled={busy !== null}
+            <div className="mt-3 space-y-3">
+              <select
+                aria-label="Country"
+                value={country}
+                onChange={(e) => {
+                  setCountry(e.target.value);
+                  setCity("");
+                }}
+                className="h-12 w-full rounded-xl border border-input bg-background px-3 text-base"
               >
-                {busy === "city" ? <Loader2 className="animate-spin" /> : "Go"}
-              </Button>
+                <option value="">Select a country</option>
+                {countries.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+              <select
+                aria-label="City"
+                value={city}
+                disabled={!country}
+                onChange={(e) => setCity(e.target.value)}
+                className="h-12 w-full rounded-xl border border-input bg-background px-3 text-base disabled:opacity-50"
+              >
+                <option value="">Select a city</option>
+                {cities.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+              <select
+                aria-label="Museum"
+                value=""
+                disabled={!city}
+                onChange={(e) => e.target.value && navigate({ to: "/museum/$slug", params: { slug: e.target.value } })}
+                className="h-12 w-full rounded-xl border border-input bg-background px-3 text-base disabled:opacity-50"
+              >
+                <option value="">Select a museum</option>
+                {cityMuseums.map((m) => (
+                  <option key={m.slug} value={m.slug}>{m.name}</option>
+                ))}
+              </select>
             </div>
-          </form>
+          </div>
         </div>
 
         <p className="mt-auto pt-10 text-center text-xs text-muted-foreground">
