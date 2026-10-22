@@ -19,7 +19,7 @@ import { Route as StudioMuseumIdRouteImport } from './routes/studio.$museumId'
 import { Route as ApiPublicArtworkGuideRouteImport } from './routes/api/public/artwork-guide'
 import { Route as ApiPublicAudioIdRouteImport } from './routes/api/public/audio.$id'
 import { Route as ApiPublicPackUrlsPackIdRouteImport } from './routes/api/public/pack-urls.$packId'
-import { Route as MuseumSlugArtifactRefRouteImport } from './routes/museum.$slug.artifact.$ref'
+import { Route as MuseumSlugArtifactRefRouteImport } from './routes/museum.$slug_.artifact.$ref'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -72,9 +72,9 @@ const ApiPublicPackUrlsPackIdRoute = ApiPublicPackUrlsPackIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const MuseumSlugArtifactRefRoute = MuseumSlugArtifactRefRouteImport.update({
-  id: '/artifact/$ref',
-  path: '/artifact/$ref',
-  getParentRoute: () => MuseumSlugRoute,
+  id: '/museum/$slug_/artifact/$ref',
+  path: '/museum/$slug/artifact/$ref',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -82,7 +82,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/museums': typeof MuseumsRoute
   '/m/$slug': typeof MSlugRoute
-  '/museum/$slug': typeof MuseumSlugRouteWithChildren
+  '/museum/$slug': typeof MuseumSlugRoute
   '/studio/$museumId': typeof StudioMuseumIdRoute
   '/studio/': typeof StudioIndexRoute
   '/api/public/artwork-guide': typeof ApiPublicArtworkGuideRoute
@@ -95,7 +95,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/museums': typeof MuseumsRoute
   '/m/$slug': typeof MSlugRoute
-  '/museum/$slug': typeof MuseumSlugRouteWithChildren
+  '/museum/$slug': typeof MuseumSlugRoute
   '/studio/$museumId': typeof StudioMuseumIdRoute
   '/studio': typeof StudioIndexRoute
   '/api/public/artwork-guide': typeof ApiPublicArtworkGuideRoute
@@ -109,13 +109,13 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/museums': typeof MuseumsRoute
   '/m/$slug': typeof MSlugRoute
-  '/museum/$slug': typeof MuseumSlugRouteWithChildren
+  '/museum/$slug': typeof MuseumSlugRoute
   '/studio/$museumId': typeof StudioMuseumIdRoute
   '/studio/': typeof StudioIndexRoute
   '/api/public/artwork-guide': typeof ApiPublicArtworkGuideRoute
   '/api/public/audio/$id': typeof ApiPublicAudioIdRoute
   '/api/public/pack-urls/$packId': typeof ApiPublicPackUrlsPackIdRoute
-  '/museum/$slug/artifact/$ref': typeof MuseumSlugArtifactRefRoute
+  '/museum/$slug_/artifact/$ref': typeof MuseumSlugArtifactRefRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -156,7 +156,7 @@ export interface FileRouteTypes {
     | '/api/public/artwork-guide'
     | '/api/public/audio/$id'
     | '/api/public/pack-urls/$packId'
-    | '/museum/$slug/artifact/$ref'
+    | '/museum/$slug_/artifact/$ref'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -164,12 +164,13 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   MuseumsRoute: typeof MuseumsRoute
   MSlugRoute: typeof MSlugRoute
-  MuseumSlugRoute: typeof MuseumSlugRouteWithChildren
+  MuseumSlugRoute: typeof MuseumSlugRoute
   StudioMuseumIdRoute: typeof StudioMuseumIdRoute
   StudioIndexRoute: typeof StudioIndexRoute
   ApiPublicArtworkGuideRoute: typeof ApiPublicArtworkGuideRoute
   ApiPublicAudioIdRoute: typeof ApiPublicAudioIdRoute
   ApiPublicPackUrlsPackIdRoute: typeof ApiPublicPackUrlsPackIdRoute
+  MuseumSlugArtifactRefRoute: typeof MuseumSlugArtifactRefRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -244,39 +245,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPackUrlsPackIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/museum/$slug/artifact/$ref': {
-      id: '/museum/$slug/artifact/$ref'
-      path: '/artifact/$ref'
+    '/museum/$slug_/artifact/$ref': {
+      id: '/museum/$slug_/artifact/$ref'
+      path: '/museum/$slug/artifact/$ref'
       fullPath: '/museum/$slug/artifact/$ref'
       preLoaderRoute: typeof MuseumSlugArtifactRefRouteImport
-      parentRoute: typeof MuseumSlugRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
-
-interface MuseumSlugRouteChildren {
-  MuseumSlugArtifactRefRoute: typeof MuseumSlugArtifactRefRoute
-}
-
-const MuseumSlugRouteChildren: MuseumSlugRouteChildren = {
-  MuseumSlugArtifactRefRoute: MuseumSlugArtifactRefRoute,
-}
-
-const MuseumSlugRouteWithChildren = MuseumSlugRoute._addFileChildren(
-  MuseumSlugRouteChildren,
-)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   MuseumsRoute: MuseumsRoute,
   MSlugRoute: MSlugRoute,
-  MuseumSlugRoute: MuseumSlugRouteWithChildren,
+  MuseumSlugRoute: MuseumSlugRoute,
   StudioMuseumIdRoute: StudioMuseumIdRoute,
   StudioIndexRoute: StudioIndexRoute,
   ApiPublicArtworkGuideRoute: ApiPublicArtworkGuideRoute,
   ApiPublicAudioIdRoute: ApiPublicAudioIdRoute,
   ApiPublicPackUrlsPackIdRoute: ApiPublicPackUrlsPackIdRoute,
+  MuseumSlugArtifactRefRoute: MuseumSlugArtifactRefRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
