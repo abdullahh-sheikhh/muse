@@ -1,9 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { MapPin, Search, Loader2, ChevronRight } from "lucide-react";
+import { MapPin, Search, Loader2, ChevronRight, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
+import { Input } from "@/components/ui/input";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { saveLocation } from "@/lib/visitor";
 import { museumPhoto } from "@/lib/museum-photos";
@@ -27,10 +28,14 @@ function Welcome() {
   const [city, setCity] = useState("");
   const [step, setStep] = useState<"country" | "city" | "museum">("country");
   const [busy, setBusy] = useState<"geo" | null>(null);
+  const [search, setSearch] = useState("");
+  const [searching, setSearching] = useState(false);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { data: all = [] } = useQuery({
     queryKey: ["museum-directory"],
+    staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("museums")
@@ -44,12 +49,44 @@ function Welcome() {
   const countries = [...new Set(all.map((m) => m.country).filter(Boolean))].sort();
   const cities = [...new Set(all.filter((m) => m.country === country).map((m) => m.city).filter(Boolean))].sort();
   const cityMuseums = all.filter((m) => m.country === country && m.city === city);
+  const q = search.trim().toLowerCase();
+  const searchHits = q
+    ? all.filter((m) => `${m.name} ${m.city} ${m.country}`.toLowerCase().includes(q))
+    : [];
   const rows =
     step === "country"
       ? countries.map((c) => ({ label: c, image: null as string | null }))
       : step === "city"
         ? cities.map((c) => ({ label: c, image: null as string | null }))
         : cityMuseums.map((m) => ({ label: m.name, image: museumPhoto(m.slug, m.image_url).url }));
+
+  async function searchTheWeb() {
+    const query = search.trim();
+    if (query.length < 3 || searching) return;
+    setSearching(true);
+    try {
+      const res = await fetch("/api/public/discover-museum", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query }),
+      });
+      const json = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        error?: string;
+        museum?: { slug: string; name: string };
+      } | null;
+      if (json?.ok && json.museum) {
+        await queryClient.invalidateQueries({ queryKey: ["museum-directory"] });
+        navigate({ to: "/museum/$slug", params: { slug: json.museum.slug } });
+      } else {
+        toast.error(json?.error ?? "No museum found for that search");
+      }
+    } catch {
+      toast.error("Couldn't search right now — try again in a moment.");
+    } finally {
+      setSearching(false);
+    }
+  }
 
   function useMyLocation() {
     if (!("geolocation" in navigator)) {
