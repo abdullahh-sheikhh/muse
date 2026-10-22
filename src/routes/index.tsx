@@ -22,6 +22,7 @@ export const Route = createFileRoute("/")({
 function Welcome() {
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
+  const [step, setStep] = useState<"country" | "city" | "museum">("country");
   const [busy, setBusy] = useState<"geo" | null>(null);
   const navigate = useNavigate();
 
