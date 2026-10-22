@@ -142,8 +142,9 @@ function MuseumPage() {
       return;
     }
     // Otherwise the list is already filtered live; a single match opens directly.
-    if (visibleArtifacts.length === 1) {
-      navigate({ to: "/museum/$slug/artifact/$ref", params: { slug, ref: visibleArtifacts[0].ref } });
+    const only = visibleArtifacts.length === 1 ? visibleArtifacts[0] : undefined;
+    if (only) {
+      navigate({ to: "/museum/$slug/artifact/$ref", params: { slug, ref: only.ref } });
     } else if (visibleArtifacts.length === 0) {
       setRefError(true);
     }
