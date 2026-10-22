@@ -19,3 +19,5 @@
 - [ ] Live Pro voice guide: authenticated partner gate, context, conversation messages, microphone UI, five-minute sessions
 - [ ] Pro QR artwork CTA and QR flow verification
 - [ ] Verify voice agent configuration, health, tests and authenticated browser flow
+
+- [x] AI button logo: replace Helios sun with classic horse-wagon wheel design

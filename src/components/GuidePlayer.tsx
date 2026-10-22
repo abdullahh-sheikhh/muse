@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, Loader2, Pause, Play, RotateCcw, RotateCw, Volume2, BookOpen } from "lucide-react";
+import { Loader2, Pause, Play, RotateCcw, RotateCw, Volume2, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +25,6 @@ export function GuidePlayer({
   const [playing, setPlaying] = useState(false);
   const [time, setTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [open, setOpen] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -210,16 +209,10 @@ export function GuidePlayer({
       )}
 
       {guide && (
-        <div className="mt-5 border-t border-border pt-2">
-          <button type="button" onClick={() => setOpen((v) => !v)} className="flex w-full items-center justify-between py-3">
-            <span className="font-medium">Transcript</span>
-            <ChevronDown className={`h-5 w-5 transition-transform ${open || !guide.audio_url ? "rotate-180" : ""}`} />
-          </button>
-          {(open || !guide.audio_url) && (
-            <p dir={rtl ? "rtl" : "ltr"} lang={language} className="whitespace-pre-line pb-3 text-sm leading-relaxed text-muted-foreground">
-              {guide.script_text}
-            </p>
-          )}
+        <div className="mt-5 border-t border-border pt-4">
+          <p dir={rtl ? "rtl" : "ltr"} lang={language} className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+            {guide.script_text}
+          </p>
         </div>
       )}
 

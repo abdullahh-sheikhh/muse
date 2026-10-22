@@ -17,6 +17,7 @@ import { Route as MuseumSlugRouteImport } from './routes/museum.$slug'
 import { Route as StudioIndexRouteImport } from './routes/studio.index'
 import { Route as StudioMuseumIdRouteImport } from './routes/studio.$museumId'
 import { Route as ApiPublicArtworkGuideRouteImport } from './routes/api/public/artwork-guide'
+import { Route as ApiPublicBackfillImagesRouteImport } from './routes/api/public/backfill-images'
 import { Route as ApiPublicDiscoverMuseumRouteImport } from './routes/api/public/discover-museum'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiPublicImportArtworksRouteImport } from './routes/api/public/import-artworks'
@@ -64,6 +65,11 @@ const StudioMuseumIdRoute = StudioMuseumIdRouteImport.update({
 const ApiPublicArtworkGuideRoute = ApiPublicArtworkGuideRouteImport.update({
   id: '/api/public/artwork-guide',
   path: '/api/public/artwork-guide',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicBackfillImagesRoute = ApiPublicBackfillImagesRouteImport.update({
+  id: '/api/public/backfill-images',
+  path: '/api/public/backfill-images',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicDiscoverMuseumRoute = ApiPublicDiscoverMuseumRouteImport.update({
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/studio/$museumId': typeof StudioMuseumIdRoute
   '/studio/': typeof StudioIndexRoute
   '/api/public/artwork-guide': typeof ApiPublicArtworkGuideRoute
+  '/api/public/backfill-images': typeof ApiPublicBackfillImagesRoute
   '/api/public/discover-museum': typeof ApiPublicDiscoverMuseumRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/import-artworks': typeof ApiPublicImportArtworksRoute
@@ -135,6 +142,7 @@ export interface FileRoutesByTo {
   '/studio/$museumId': typeof StudioMuseumIdRoute
   '/studio': typeof StudioIndexRoute
   '/api/public/artwork-guide': typeof ApiPublicArtworkGuideRoute
+  '/api/public/backfill-images': typeof ApiPublicBackfillImagesRoute
   '/api/public/discover-museum': typeof ApiPublicDiscoverMuseumRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/import-artworks': typeof ApiPublicImportArtworksRoute
@@ -154,6 +162,7 @@ export interface FileRoutesById {
   '/studio/$museumId': typeof StudioMuseumIdRoute
   '/studio/': typeof StudioIndexRoute
   '/api/public/artwork-guide': typeof ApiPublicArtworkGuideRoute
+  '/api/public/backfill-images': typeof ApiPublicBackfillImagesRoute
   '/api/public/discover-museum': typeof ApiPublicDiscoverMuseumRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/import-artworks': typeof ApiPublicImportArtworksRoute
@@ -174,6 +183,7 @@ export interface FileRouteTypes {
     | '/studio/$museumId'
     | '/studio/'
     | '/api/public/artwork-guide'
+    | '/api/public/backfill-images'
     | '/api/public/discover-museum'
     | '/api/public/health'
     | '/api/public/import-artworks'
@@ -192,6 +202,7 @@ export interface FileRouteTypes {
     | '/studio/$museumId'
     | '/studio'
     | '/api/public/artwork-guide'
+    | '/api/public/backfill-images'
     | '/api/public/discover-museum'
     | '/api/public/health'
     | '/api/public/import-artworks'
@@ -210,6 +221,7 @@ export interface FileRouteTypes {
     | '/studio/$museumId'
     | '/studio/'
     | '/api/public/artwork-guide'
+    | '/api/public/backfill-images'
     | '/api/public/discover-museum'
     | '/api/public/health'
     | '/api/public/import-artworks'
@@ -229,6 +241,7 @@ export interface RootRouteChildren {
   StudioMuseumIdRoute: typeof StudioMuseumIdRoute
   StudioIndexRoute: typeof StudioIndexRoute
   ApiPublicArtworkGuideRoute: typeof ApiPublicArtworkGuideRoute
+  ApiPublicBackfillImagesRoute: typeof ApiPublicBackfillImagesRoute
   ApiPublicDiscoverMuseumRoute: typeof ApiPublicDiscoverMuseumRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
   ApiPublicImportArtworksRoute: typeof ApiPublicImportArtworksRoute
@@ -295,6 +308,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/artwork-guide'
       fullPath: '/api/public/artwork-guide'
       preLoaderRoute: typeof ApiPublicArtworkGuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/backfill-images': {
+      id: '/api/public/backfill-images'
+      path: '/api/public/backfill-images'
+      fullPath: '/api/public/backfill-images'
+      preLoaderRoute: typeof ApiPublicBackfillImagesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/discover-museum': {
@@ -365,6 +385,7 @@ const rootRouteChildren: RootRouteChildren = {
   StudioMuseumIdRoute: StudioMuseumIdRoute,
   StudioIndexRoute: StudioIndexRoute,
   ApiPublicArtworkGuideRoute: ApiPublicArtworkGuideRoute,
+  ApiPublicBackfillImagesRoute: ApiPublicBackfillImagesRoute,
   ApiPublicDiscoverMuseumRoute: ApiPublicDiscoverMuseumRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
   ApiPublicImportArtworksRoute: ApiPublicImportArtworksRoute,
