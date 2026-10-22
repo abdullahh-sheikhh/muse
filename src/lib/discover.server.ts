@@ -84,15 +84,15 @@ export async function discoverMuseum(
     `Query: ${query}\n\nResults:\n${hits.map((h) => `- ${h.title} (${h.url}): ${h.snippet}`).join("\n")}`,
   );
   const raw = parseJson<Record<string, unknown>>(text);
-  if (!raw || !cleanString(raw.name) || !cleanString(raw.city)) return null;
+  if (!raw || !cleanString(raw["name"]) || !cleanString(raw["city"])) return null;
   return {
-    name: cleanString(raw.name, 120),
-    city: cleanString(raw.city, 80),
-    country: cleanString(raw.country, 80),
-    lat: cleanNumber(raw.lat),
-    lng: cleanNumber(raw.lng),
-    intro: cleanString(raw.intro, 200),
-    image_url: trustedImage(raw.image_url, hits),
+    name: cleanString(raw["name"], 120),
+    city: cleanString(raw["city"], 80),
+    country: cleanString(raw["country"], 80),
+    lat: cleanNumber(raw["lat"]),
+    lng: cleanNumber(raw["lng"]),
+    intro: cleanString(raw["intro"], 200),
+    image_url: trustedImage(raw["image_url"], hits),
   };
 }
 
@@ -114,11 +114,11 @@ export async function discoverArtworks(
   return raw
     .map((item, i) => ({
       ref: `A-${String(i + 1).padStart(3, "0")}`,
-      title: cleanString(item.title, 160),
-      artist: cleanString(item.artist, 120),
-      year: cleanString(item.year, 40),
-      room: cleanString(item.room, 80),
-      description: cleanString(item.description, 240),
+      title: cleanString(item["title"], 160),
+      artist: cleanString(item["artist"], 120),
+      year: cleanString(item["year"], 40),
+      room: cleanString(item["room"], 80),
+      description: cleanString(item["description"], 240),
     }))
     .filter((a) => a.title);
 }
