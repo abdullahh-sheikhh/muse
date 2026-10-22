@@ -14,36 +14,186 @@ export type Database = {
   }
   public: {
     Tables: {
-      museums: {
+      artifacts: {
+        Row: {
+          artist: string
+          created_at: string
+          id: string
+          image_url: string | null
+          museum_id: string
+          ref: string
+          room: string
+          sort_order: number
+          title: string
+          year: string
+        }
+        Insert: {
+          artist?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          museum_id: string
+          ref: string
+          room?: string
+          sort_order?: number
+          title: string
+          year?: string
+        }
+        Update: {
+          artist?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          museum_id?: string
+          ref?: string
+          room?: string
+          sort_order?: number
+          title?: string
+          year?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artifacts_museum_id_fkey"
+            columns: ["museum_id"]
+            isOneToOne: false
+            referencedRelation: "museums"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      artwork_facts: {
+        Row: {
+          artwork_id: string
+          id: string
+          label: string
+          sort_order: number
+          source_url: string | null
+        }
+        Insert: {
+          artwork_id: string
+          id?: string
+          label: string
+          sort_order?: number
+          source_url?: string | null
+        }
+        Update: {
+          artwork_id?: string
+          id?: string
+          label?: string
+          sort_order?: number
+          source_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artwork_facts_artwork_id_fkey"
+            columns: ["artwork_id"]
+            isOneToOne: false
+            referencedRelation: "artifacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audio_packs: {
         Row: {
           created_at: string
           id: string
-          intro: string
-          languages: string[]
-          name: string
-          owner_id: string
-          slug: string
-          source_language: string
+          language: string
+          manifest: Json
+          museum_id: string
+          status: string
         }
         Insert: {
           created_at?: string
           id?: string
-          intro?: string
-          languages?: string[]
-          name: string
-          owner_id: string
-          slug: string
-          source_language?: string
+          language: string
+          manifest?: Json
+          museum_id: string
+          status?: string
         }
         Update: {
           created_at?: string
           id?: string
+          language?: string
+          manifest?: Json
+          museum_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_packs_museum_id_fkey"
+            columns: ["museum_id"]
+            isOneToOne: false
+            referencedRelation: "museums"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      museums: {
+        Row: {
+          city: string
+          created_at: string
+          id: string
+          image_url: string | null
+          intro: string
+          is_partner: boolean
+          languages: string[]
+          lat: number | null
+          lng: number | null
+          name: string
+          owner_id: string
+          ref_label: string
+          slug: string
+          source_language: string
+        }
+        Insert: {
+          city?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
           intro?: string
+          is_partner?: boolean
           languages?: string[]
+          lat?: number | null
+          lng?: number | null
+          name: string
+          owner_id: string
+          ref_label?: string
+          slug: string
+          source_language?: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          intro?: string
+          is_partner?: boolean
+          languages?: string[]
+          lat?: number | null
+          lng?: number | null
           name?: string
           owner_id?: string
+          ref_label?: string
           slug?: string
           source_language?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          preferred_language: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          preferred_language?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          preferred_language?: string
         }
         Relationships: []
       }
@@ -130,11 +280,72 @@ export type Database = {
           },
         ]
       }
+      visit_events: {
+        Row: {
+          artwork_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          museum_id: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          artwork_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          museum_id?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          artwork_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          museum_id?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visit_events_artwork_id_fkey"
+            columns: ["artwork_id"]
+            isOneToOne: false
+            referencedRelation: "artifacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visit_events_museum_id_fkey"
+            columns: ["museum_id"]
+            isOneToOne: false
+            referencedRelation: "museums"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      lookup_artifact: {
+        Args: { _ref: string; _slug: string }
+        Returns: {
+          artifact_ref: string
+          museum_slug: string
+        }[]
+      }
+      nearby_museums: {
+        Args: { _lat: number; _lng: number; _radius_km?: number }
+        Returns: {
+          city: string
+          distance_km: number
+          id: string
+          image_url: string
+          is_partner: boolean
+          name: string
+          slug: string
+        }[]
+      }
       owns_museum: { Args: { _museum_id: string }; Returns: boolean }
     }
     Enums: {

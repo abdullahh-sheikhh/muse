@@ -8,6 +8,13 @@
       "when": 1792658624769,
       "tag": "0000_adi_core",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792665129043,
+      "tag": "0001_muse_schema",
+      "breakpoints": true
     }
   ]
 }
