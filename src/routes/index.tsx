@@ -131,7 +131,7 @@ function Welcome() {
                             setCity(item);
                             setStep("museum");
                           } else {
-                            navigate({ to: "/museum/$slug", params: { slug: cityMuseums[idx].slug } });
+                            navigate({ to: "/museum/$slug", params: { slug: cityMuseums[idx]!.slug } });
                           }
                         }}
                         className={`flex min-h-14 w-full items-center justify-between rounded-2xl border px-4 text-left text-lg font-display transition-all active:scale-[0.98] ${
