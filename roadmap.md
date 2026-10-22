@@ -13,4 +13,5 @@
 - [x] visit_events logging (number_entry, qr_scan, open, play)
 - [x] Verify: build, tests, browser smoke test
 - [x] Museum cover photos: demo images hosted as app assets, shown in the picker list and museum header
-- [x] Replace generated museum placeholders with real internet photography; verify source and display. Demo photos are explicitly illustrative with linked credits.
+- [x] Remove unrelated and generated museum photos from every museum view.
+- [ ] Use only verified photos of the exact museum; unverified demo identities need correction from the user.
