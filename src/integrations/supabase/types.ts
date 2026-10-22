@@ -14,13 +14,128 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      museums: {
+        Row: {
+          created_at: string
+          id: string
+          intro: string
+          languages: string[]
+          name: string
+          owner_id: string
+          slug: string
+          source_language: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          intro?: string
+          languages?: string[]
+          name: string
+          owner_id: string
+          slug: string
+          source_language?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          intro?: string
+          languages?: string[]
+          name?: string
+          owner_id?: string
+          slug?: string
+          source_language?: string
+        }
+        Relationships: []
+      }
+      stop_audio: {
+        Row: {
+          audio_url: string
+          body: string
+          id: string
+          language: string
+          museum_id: string
+          stop_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          audio_url: string
+          body: string
+          id?: string
+          language: string
+          museum_id: string
+          stop_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          audio_url?: string
+          body?: string
+          id?: string
+          language?: string
+          museum_id?: string
+          stop_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stop_audio_museum_id_fkey"
+            columns: ["museum_id"]
+            isOneToOne: false
+            referencedRelation: "museums"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stop_audio_stop_id_fkey"
+            columns: ["stop_id"]
+            isOneToOne: false
+            referencedRelation: "stops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stops: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          museum_id: string
+          number: number
+          title: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          id?: string
+          museum_id: string
+          number: number
+          title: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          museum_id?: string
+          number?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stops_museum_id_fkey"
+            columns: ["museum_id"]
+            isOneToOne: false
+            referencedRelation: "museums"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      owns_museum: { Args: { _museum_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
