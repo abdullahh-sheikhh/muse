@@ -133,12 +133,18 @@ function MuseumPage() {
     const ref = (spoken ?? refInput).trim();
     if (!ref || !museum) return;
     setRefError(false);
+    // Exact catalogue-number match jumps straight to the artwork.
     const { data, error } = await supabase.rpc("lookup_artifact", { _slug: slug, _ref: ref });
     const hit = !error ? data?.[0] : undefined;
     if (hit?.artifact_ref) {
       logEvent("number_entry", museum.id);
       navigate({ to: "/museum/$slug/artifact/$ref", params: { slug, ref: hit.artifact_ref } });
-    } else {
+      return;
+    }
+    // Otherwise the list is already filtered live; a single match opens directly.
+    if (visibleArtifacts.length === 1) {
+      navigate({ to: "/museum/$slug/artifact/$ref", params: { slug, ref: visibleArtifacts[0].ref } });
+    } else if (visibleArtifacts.length === 0) {
       setRefError(true);
     }
   }
@@ -358,17 +364,6 @@ function MuseumPage() {
 
         <section className="mt-10">
           <h2 className="text-2xl">Artworks</h2>
-          {(artifacts?.length ?? 0) > 0 && (
-            <div className="relative mt-4">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={artSearch}
-                onChange={(e) => setArtSearch(e.target.value)}
-                placeholder="Search by name, artist, room or number…"
-                className="h-12 rounded-xl pl-11"
-              />
-            </div>
-          )}
           <div className="mt-4 space-y-3">
             {visibleArtifacts.map((a) => (
               <Link
