@@ -146,11 +146,18 @@ function MuseumPage() {
       const url = new URL(text, window.location.origin);
       const m = url.pathname.match(/^\/museum\/([^/]+)\/artifact\/([^/]+)$/);
       if (m?.[1] && m[2] && museum) {
-        logEvent("qr_scan", museum.id);
-        navigate({
-          to: "/museum/$slug/artifact/$ref",
-          params: { slug: m[1], ref: decodeURIComponent(m[2]) },
-        });
+        const target = { slug: decodeURIComponent(m[1]), ref: decodeURIComponent(m[2]) };
+        if (target.slug !== slug) {
+          toast.error("This QR code belongs to another museum", {
+            action: {
+              label: "Open it",
+              onClick: () => navigate({ to: "/museum/$slug/artifact/$ref", params: target, search: { src: "qr" } }),
+            },
+          });
+          return;
+        }
+        // The artwork page logs the qr_scan event (also covers phone-camera scans).
+        navigate({ to: "/museum/$slug/artifact/$ref", params: target, search: { src: "qr" } });
         return;
       }
     } catch {
