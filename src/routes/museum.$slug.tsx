@@ -359,8 +359,19 @@ function MuseumPage() {
 
         <section className="mt-10">
           <h2 className="text-2xl">Artworks</h2>
+          {(artifacts?.length ?? 0) > 0 && (
+            <div className="relative mt-4">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={artSearch}
+                onChange={(e) => setArtSearch(e.target.value)}
+                placeholder="Search by name, artist, room or number…"
+                className="h-12 rounded-xl pl-11"
+              />
+            </div>
+          )}
           <div className="mt-4 space-y-3">
-            {artifacts?.map((a) => (
+            {visibleArtifacts.map((a) => (
               <Link
                 key={a.id}
                 to="/museum/$slug/artifact/$ref"
