@@ -19,7 +19,7 @@ export const Route = createFileRoute("/museum/$slug_/artifact/$ref")({
     ],
   }),
   validateSearch: (search: Record<string, unknown>): { src?: "qr" } =>
-    search.src === "qr" ? { src: "qr" } : {},
+    search["src"] === "qr" ? { src: "qr" } : {},
   component: ArtifactPage,
 });
 
