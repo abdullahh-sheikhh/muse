@@ -10,7 +10,7 @@ export async function ensureVisitor() {
   return anon.user;
 }
 
-export type VisitEventType = "number_entry" | "qr_scan" | "open" | "play";
+export type VisitEventType = "number_entry" | "qr_scan" | "open" | "play" | "agent_start" | "agent_end" | "question";
 
 export async function logEvent(eventType: VisitEventType, museumId?: string, artworkId?: string) {
   try {

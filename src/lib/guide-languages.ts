@@ -20,7 +20,7 @@ export function isLanguageTag(s: string) {
 }
 
 export function isRtl(code: string) {
-  return RTL.includes(code.split("-")[0]!.toLowerCase());
+  return RTL.includes((code.split("-")[0] ?? "").toLowerCase());
 }
 
 /** Display name of a language in its own language, e.g. "fr" → "français". */

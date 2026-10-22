@@ -68,6 +68,22 @@ async function runText(apiKey: string, instructions: string, prompt: string) {
   return text;
 }
 
+export async function agentGreeting(apiKey: string, title: string, language: string) {
+  const english = `Hi! You're looking at ${title}. What would you like to know?`;
+  if (language.split("-")[0] === "en") return english;
+  try {
+    return await runText(apiKey, `Translate the greeting into ${languageName(language)}. Keep the artwork title. Return only the greeting, no markdown.`, english);
+  } catch {
+    return english;
+  }
+}
+
+export async function elevenAgent(apiKey: string, agentId: string) {
+  const res = await fetch(`${ELEVEN}/v1/convai/agents/${encodeURIComponent(agentId)}`, { headers: { "xi-api-key": apiKey } });
+  if (!res.ok) throw new Error(`ElevenLabs agent ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  return res.json();
+}
+
 export function writeNarration(
   apiKey: string,
   art: { title: string; artist: string; year: string },
