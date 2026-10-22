@@ -127,7 +127,10 @@ export function GuidePlayer({
           onSubmit={(e) => {
             e.preventDefault();
             const tag = toLanguageTag(otherText);
-            if (!tag) return toast.error("Unknown language — try a name like “Polish” or a code like “pl”.");
+            if (!tag) {
+              toast.error("Unknown language — try a name like “Polish” or a code like “pl”.");
+              return;
+            }
             setOther(false);
             changeLanguage(tag);
           }}
