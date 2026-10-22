@@ -55,7 +55,6 @@ function MuseumPage() {
   const [progress, setProgress] = useState<number | null>(null);
   const [downloaded, setDownloaded] = useState<string | null>(null);
   const [preferred, setPreferred] = useState("en");
-  const [artSearch, setArtSearch] = useState("");
   const [importing, setImporting] = useState(false);
 
   const { data: museum, isLoading } = useQuery({
@@ -87,7 +86,7 @@ function MuseumPage() {
     },
   });
 
-  const artQuery = artSearch.trim().toLowerCase();
+  const artQuery = refInput.trim().toLowerCase();
   const visibleArtifacts = artQuery
     ? (artifacts ?? []).filter((a) =>
         `${a.ref} ${a.title} ${a.artist} ${a.room} ${a.description}`.toLowerCase().includes(artQuery),
