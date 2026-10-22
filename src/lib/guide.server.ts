@@ -44,7 +44,7 @@ function provider(apiKey: string) {
   });
 }
 
-async function runText(apiKey: string, instructions: string, prompt: string) {
+export async function runText(apiKey: string, instructions: string, prompt: string) {
   let failure: unknown;
   const result = streamText({
     model: provider(apiKey).responses(TEXT_MODEL),
