@@ -137,7 +137,7 @@ function MuseumPage() {
     try {
       const url = new URL(text, window.location.origin);
       const m = url.pathname.match(/^\/museum\/([^/]+)\/artifact\/([^/]+)$/);
-      if (m && museum) {
+      if (m?.[1] && m[2] && museum) {
         logEvent("qr_scan", museum.id);
         navigate({
           to: "/museum/$slug/artifact/$ref",
