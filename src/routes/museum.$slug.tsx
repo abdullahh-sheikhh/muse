@@ -183,9 +183,9 @@ function MuseumPage() {
               {museum.name.charAt(0)}
             </div>
           )}
-          {photo.illustrative && (
+          {photo.source && (
             <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-              Illustrative photo: {photo.subject}.{" "}
+              Photo: {photo.subject}.{" "}
               <a href={photo.source} target="_blank" rel="noreferrer" className="underline">{photo.credit}</a>
             </p>
           )}
